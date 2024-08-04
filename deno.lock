@@ -81,6 +81,7 @@
       "jsr:@std/assert@^1.0.1",
       "jsr:@std/bytes@^1.0.2",
       "jsr:@std/encoding@^1.0.1",
+      "jsr:@std/path@^1.0.2",
       "jsr:@std/streams@^1.0.0",
       "jsr:@std/testing@^0.225.3"
     ]
