@@ -7,9 +7,11 @@ import {
 import { Hash, LengthVerifierStream } from "./hash.ts";
 import { Keychain } from "./keychain.ts";
 import { Data, parseKeyValue } from "./util.ts";
+import { NarListing } from "./nar.ts";
 
 export class NarInfo extends Data<{
   storeDir: string;
+  listing: NarListing;
   storePath: string;
   url: URL;
   compression: CompressionAlgorithm;
@@ -52,7 +54,11 @@ export class NarInfo extends Data<{
     ].join(";");
   }
 
-  static parse(text: string, binaryCache: { storeDir: string; url: URL }) {
+  static parse(
+    text: string,
+    binaryCache: { storeDir: string; url: URL },
+    listing: NarListing,
+  ) {
     const data = parseKeyValue(text, ": ");
 
     assert(
@@ -62,6 +68,7 @@ export class NarInfo extends Data<{
 
     return new NarInfo({
       storeDir: binaryCache.storeDir,
+      listing,
       storePath: data.StorePath,
       url: new URL(data.URL, binaryCache.url),
       compression: data.Compression,

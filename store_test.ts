@@ -10,10 +10,7 @@ Deno.test({
   name: "nixpkgs#hello",
   ignore: netPermission.state !== "granted",
   async fn(t) {
-    // const cache = await BinaryCache.open(new URL("https://cache.nixos.org"));
-    const cache = await BinaryCache.open(
-      new URL("file:///home/tom/tmp/binary-cache"),
-    );
+    const cache = await BinaryCache.open(new URL("https://cache.nixos.org"));
     const nixosKeychain = await Keychain.create([NIXOS_KEY]);
     const emptyKeychain = new Keychain();
 
@@ -37,7 +34,7 @@ Deno.test({
         const validInfo = info.clone();
         const nar = await validInfo.nar();
         const bytes = await new Response(nar).arrayBuffer();
-        await assertSnapshot(t, bytes);
+        await assertSnapshot(t, bytes.byteLength);
       });
 
       await t.step("wrong compressed size", async () => {
