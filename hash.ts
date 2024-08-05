@@ -1,4 +1,3 @@
-import { encodeHex } from "@std/encoding/hex";
 import { createHash } from "node:crypto";
 import { decodeNixBase32 } from "./base32.ts";
 import { splitOnce } from "./util.ts";
