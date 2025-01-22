@@ -819,4 +819,4 @@ NarInfo {
 }
 `;
 
-snapshot[`nixpkgs#hello > nar > valid 1`] = `226560`;
+snapshot[`nixpkgs#hello > nar > valid 1`] = `142`;

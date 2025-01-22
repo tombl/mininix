@@ -1,5 +1,6 @@
 import { join } from "@std/path";
 import { concat } from "@std/bytes/concat";
+import { assertEquals } from "@std/assert/equals";
 
 type Entry =
   | RegularEntry
@@ -59,16 +60,22 @@ function flatten(nar: NarListing) {
   return { regular, symlink, directory };
 }
 
-type StreamEntry =
-  | (RegularEntry & { path: string; body: Uint8Array })
+export type StreamEntry =
+  | (RegularEntry & { path: string; body: ReadableStream<Uint8Array> })
   | (SymlinkEntry & { path: string })
   | (DirectoryEntry & { path: string });
 
 export function createNarEntryStream(listing: NarListing) {
+  assertEquals(listing.version, 1);
+
   const files = flatten(listing);
-  let file = 0;
-  let offset = 0;
-  let extra: Uint8Array | undefined;
+  let current: {
+    file: RegularEntry & { path: string };
+    writer: WritableStreamDefaultWriter<Uint8Array>;
+  } | undefined = undefined;
+
+  // Sort the files by offset, with the first file being the first popped.
+  files.regular.sort((a, b) => a.narOffset - b.narOffset);
 
   return new TransformStream<Uint8Array, StreamEntry>({
     start(controller) {
@@ -76,54 +83,31 @@ export function createNarEntryStream(listing: NarListing) {
       for (const entry of files.symlink) controller.enqueue(entry);
     },
     transform(chunk, controller) {
-      if (extra) chunk = concat([extra, chunk]);
-      extra = undefined;
+      while (chunk.length) {
+        if (!current) {
+          const file = files.regular.pop();
+          if (!file) return controller.error(new Error("trailing data"));
+          const { readable, writable } = new TransformStream<Uint8Array>();
+          controller.enqueue({ ...file, body: readable });
+          current = { file, writer: writable.getWriter() };
+        }
 
-      while (chunk.length > 0 && file < files.regular.length) {
-        const entry = files.regular[file];
-        const remainingSize = entry.size - offset;
+        const { file, writer } = current;
+        const slice = chunk.subarray(0, file.size);
 
-        if (chunk.length >= remainingSize) {
-          const body = chunk.subarray(0, remainingSize);
-          controller.enqueue({ ...entry, body });
-          chunk = chunk.subarray(remainingSize);
-          file++;
-          offset = 0;
-        } else {
-          offset += chunk.length;
-          break;
+        writer.write(slice);
+        file.size -= slice.length;
+        chunk = chunk.subarray(slice.length);
+
+        if (file.size === 0) {
+          writer.close();
+          current = undefined;
         }
       }
-
-      extra = chunk;
     },
-  });
-}
-
-if (import.meta.main) {
-  const listing: NarListing = JSON.parse(
-    await Deno.readTextFile(Deno.args[0]),
-  );
-  const out = Deno.args[1] ?? "./out";
-  for await (
-    const entry of Deno.stdin.readable.pipeThrough(
-      createNarEntryStream(listing),
-    )
-  ) {
-    const path = join(out, entry.path);
-    switch (entry.type) {
-      case "regular":
-        await Deno.writeFile(path, entry.body, {
-          mode: entry.executable ? 0o755 : 0o644,
-        });
-        break;
-      case "symlink":
-        console.log(entry.target);
-        // await Deno.symlink(entry.target, path);
-        break;
-      case "directory":
-        await Deno.mkdir(path);
-        break;
+    flush() {
+      console.log("flush");
+      current?.writer.abort();
     }
-  }
+  });
 }

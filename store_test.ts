@@ -3,6 +3,7 @@ import { assertSnapshot } from "@std/testing/snapshot";
 import { Keychain, NIXOS_KEY } from "./keychain.ts";
 import { NarInfo } from "./narinfo.ts";
 import { BinaryCache } from "./store.ts";
+import { StreamEntry } from "./nar.ts";
 
 const netPermission = await Deno.permissions.query({ name: "net" });
 
@@ -33,8 +34,9 @@ Deno.test({
       await t.step("valid", async (t) => {
         const validInfo = info.clone();
         const nar = await validInfo.nar();
-        const bytes = await new Response(nar).arrayBuffer();
-        await assertSnapshot(t, bytes.byteLength);
+        const entries: StreamEntry[] = [];
+        for await (const entry of nar) entries.push(entry);
+        await assertSnapshot(t, entries.length);
       });
 
       await t.step("wrong compressed size", async () => {
@@ -42,7 +44,7 @@ Deno.test({
         wrongInfo.fileSize *= 2;
         await assertRejects(async () => {
           const nar = await wrongInfo.nar();
-          await new Response(nar).arrayBuffer();
+          for await (const _ of nar);
         });
       });
 
@@ -51,7 +53,7 @@ Deno.test({
         wrongInfo.narSize *= 2;
         await assertRejects(async () => {
           const nar = await wrongInfo.nar();
-          await new Response(nar).arrayBuffer();
+          for await (const _ of nar);
         });
       });
 
@@ -60,7 +62,7 @@ Deno.test({
         wrongInfo.fileHash.hash[0]++;
         await assertRejects(async () => {
           const nar = await wrongInfo.nar();
-          await new Response(nar).arrayBuffer();
+          for await (const _ of nar);
         });
       });
 
@@ -69,7 +71,7 @@ Deno.test({
         wrongInfo.narHash.hash[0]++;
         await assertRejects(async () => {
           const nar = await wrongInfo.nar();
-          await new Response(nar).arrayBuffer();
+          for await (const _ of nar);
         });
       });
     });
