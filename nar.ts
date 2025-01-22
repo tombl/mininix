@@ -1,5 +1,5 @@
 import { join } from "@std/path";
-import { concat } from "jsr:@std/bytes@^1.0.2/concat";
+import { concat } from "@std/bytes/concat";
 
 type Entry =
   | RegularEntry

@@ -1,4 +1,4 @@
-import { assert } from "jsr:@std/assert@^1.0.1/assert";
+import { assert } from "@std/assert/assert";
 import {
   CompressionAlgorithm,
   createDecompressionStream,
