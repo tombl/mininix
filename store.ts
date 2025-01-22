@@ -1,3 +1,4 @@
+import { NarListing } from "./nar.ts";
 import { NarInfo } from "./narinfo.ts";
 import { Data, parseKeyValue } from "./util.ts";
 
@@ -28,7 +29,19 @@ export class BinaryCache extends Data<{
 
   async narInfo(hash: string) {
     const response = await this.fetch(hash + ".narinfo");
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText}`);
+    }
     const text = await response.text();
-    return NarInfo.parse(text, this);
+
+    const listingResponse = await this.fetch(hash + ".ls");
+    if (!listingResponse.ok) {
+      throw new Error(
+        `${listingResponse.status} ${listingResponse.statusText}`,
+      );
+    }
+    const listing: NarListing = await listingResponse.json();
+
+    return NarInfo.parse(text, this, listing);
   }
 }
