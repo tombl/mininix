@@ -1,21 +1,39 @@
 #!/usr/bin/env -S deno run -A
+import { join } from "@std/path";
 import { Keychain, NIXOS_KEY } from "./keychain.ts";
 import { BinaryCache } from "./store.ts";
 
 const keychain = new Keychain();
 await keychain.trust(NIXOS_KEY);
 
-// const cache = await BinaryCache.create(new URL("https://cache.nixos.org"));
+const out = Deno.args[0] ?? "./out";
+
+// const cache = await BinaryCache.open(new URL("https://cache.nixos.org"));
 const cache = await BinaryCache.open(
   new URL("file:///home/tom/tmp/binary-cache"),
 );
-const info = await cache.narInfo("0n2d54ql7fw485p1181sz6v6j287p4fq");
+const info = await cache.narInfo("a7hnr9dcmx3qkkn8a20g7md1wya5zc9l");
 
-console.log(info.fingerprint());
+console.log(info);
 
-// console.log(await info.verify(keychain));
+if (!(await info.verify(keychain))) {
+  throw new Error("Invalid signature");
+}
 
-// const nar = await info.fetchNar();
-
-// const bytes = await new Response(nar).arrayBuffer();
-// console.log(bytes.byteLength)
+for await (const entry of await info.nar()) {
+  const path = join(out, entry.path);
+  console.log(`${entry.type} ${path}`);
+  switch (entry.type) {
+    case "regular":
+      await Deno.writeFile(path, entry.body, {
+        mode: entry.executable ? 0o755 : 0o644,
+      });
+      break;
+    case "symlink":
+      await Deno.symlink(entry.target, path);
+      break;
+    case "directory":
+      await Deno.mkdir(path);
+      break;
+  }
+}

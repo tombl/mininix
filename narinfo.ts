@@ -7,7 +7,7 @@ import {
 import { Hash, LengthVerifierStream } from "./hash.ts";
 import { Keychain } from "./keychain.ts";
 import { Data, parseKeyValue } from "./util.ts";
-import { NarListing } from "./nar.ts";
+import { createNarEntryStream, NarListing } from "./nar.ts";
 
 export class NarInfo extends Data<{
   storeDir: string;
@@ -34,7 +34,8 @@ export class NarInfo extends Data<{
       .pipeThrough(this.fileHash.createVerifierStream())
       .pipeThrough(createDecompressionStream(this.compression))
       .pipeThrough(new LengthVerifierStream(this.narSize))
-      .pipeThrough(this.narHash.createVerifierStream());
+      .pipeThrough(this.narHash.createVerifierStream())
+      .pipeThrough(createNarEntryStream(this.listing));
   }
 
   verify(keychain: Keychain) {

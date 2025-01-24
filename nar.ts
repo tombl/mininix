@@ -1,5 +1,5 @@
-import { join } from "@std/path";
-import { concat } from "@std/bytes/concat";
+import { ByteSliceStream, toTransformStream } from "@std/streams";
+import { assertEquals } from "@std/assert";
 
 type Entry =
   | RegularEntry
@@ -59,71 +59,31 @@ function flatten(nar: NarListing) {
   return { regular, symlink, directory };
 }
 
-type StreamEntry =
-  | (RegularEntry & { path: string; body: Uint8Array })
+export type StreamEntry =
+  | (RegularEntry & { path: string; body: ReadableStream<Uint8Array> })
   | (SymlinkEntry & { path: string })
   | (DirectoryEntry & { path: string });
 
 export function createNarEntryStream(listing: NarListing) {
+  assertEquals(listing.version, 1);
+
   const files = flatten(listing);
-  let file = 0;
-  let offset = 0;
-  let extra: Uint8Array | undefined;
+  files.regular.sort((a, b) => a.narOffset - b.narOffset);
 
-  return new TransformStream<Uint8Array, StreamEntry>({
-    start(controller) {
-      for (const entry of files.directory) controller.enqueue(entry);
-      for (const entry of files.symlink) controller.enqueue(entry);
-    },
-    transform(chunk, controller) {
-      if (extra) chunk = concat([extra, chunk]);
-      extra = undefined;
+  return toTransformStream<Uint8Array, StreamEntry>(async function* (stream) {
+    yield* files.directory;
+    yield* files.symlink;
 
-      while (chunk.length > 0 && file < files.regular.length) {
-        const entry = files.regular[file];
-        const remainingSize = entry.size - offset;
+    for (const file of files.regular) {
+      let stream2;
+      [stream, stream2] = stream.tee();
 
-        if (chunk.length >= remainingSize) {
-          const body = chunk.subarray(0, remainingSize);
-          controller.enqueue({ ...entry, body });
-          chunk = chunk.subarray(remainingSize);
-          file++;
-          offset = 0;
-        } else {
-          offset += chunk.length;
-          break;
-        }
-      }
-
-      extra = chunk;
-    },
-  });
-}
-
-if (import.meta.main) {
-  const listing: NarListing = JSON.parse(
-    await Deno.readTextFile(Deno.args[0]),
-  );
-  const out = Deno.args[1] ?? "./out";
-  for await (
-    const entry of Deno.stdin.readable.pipeThrough(
-      createNarEntryStream(listing),
-    )
-  ) {
-    const path = join(out, entry.path);
-    switch (entry.type) {
-      case "regular":
-        await Deno.writeFile(path, entry.body, {
-          mode: entry.executable ? 0o755 : 0o644,
-        });
-        break;
-      case "symlink":
-        console.log(entry.target);
-        // await Deno.symlink(entry.target, path);
-        break;
-      case "directory":
-        await Deno.mkdir(path);
-        break;
+      const body = stream2.pipeThrough(
+        new ByteSliceStream(file.narOffset, file.narOffset + file.size),
+      );
+      yield { ...file, body };
     }
-  }
+
+    await stream.cancel();
+  });
 }
