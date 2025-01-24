@@ -23,7 +23,7 @@ export class NarInfo extends Data<{
   deriver: string;
   sig: string;
 }> {
-  async nar() {
+  async files() {
     const response = await fetch(this.url);
     if (!response.ok) {
       throw new Error(`${response.status} ${response.statusText}`);

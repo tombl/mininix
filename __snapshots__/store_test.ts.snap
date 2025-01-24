@@ -3,46 +3,46 @@ export const snapshot = {};
 snapshot[`nixpkgs#hello > fetch 1`] = `
 NarInfo {
   compression: "xz",
-  deriver: "fqs92lzychkm6p37j7fnj4d65nq9fzla-hello-2.12.1.drv",
+  deriver: "pznj731mjim1xdd5mir97l20pk3gy5a8-hello-2.12.1.drv",
   fileHash: Hash {
     algorithm: "sha256",
     hash: Uint8Array(32) [
-      55,
-      4,
-      13,
-      107,
-      248,
+      154,
+      223,
+      186,
+      27,
       240,
-      22,
-      164,
-      131,
-      173,
-      52,
-      254,
-      7,
-      36,
-      30,
-      61,
-      199,
-      57,
-      93,
-      19,
-      152,
-      202,
-      22,
-      90,
-      149,
-      203,
-      13,
-      228,
-      159,
-      79,
-      49,
+      59,
+      27,
       55,
+      0,
+      67,
+      192,
+      157,
+      136,
+      86,
+      236,
+      93,
+      152,
+      47,
+      31,
+      174,
+      13,
+      35,
+      42,
+      193,
+      30,
+      102,
+      242,
+      182,
+      224,
+      95,
+      6,
+      141,
     ],
-    raw: "sha256:0dri9ygy83fbjmd1djlq2dfkkirx3qj0gzilmn1s85phz1mhs11p",
+    raw: "sha256:1386bzhbdwk63v0jl8qdmqgjz62xxib8i7f08c03f6rvy0dvmpws",
   },
-  fileSize: 50364,
+  fileSize: 52484,
   listing: {
     root: {
       entries: {
@@ -51,7 +51,7 @@ NarInfo {
             hello: {
               executable: true,
               narOffset: 400,
-              size: 55712,
+              size: 63832,
               type: "regular",
             },
           },
@@ -62,7 +62,7 @@ NarInfo {
             info: {
               entries: {
                 "hello.info": {
-                  narOffset: 56608,
+                  narOffset: 64728,
                   size: 36466,
                   type: "regular",
                 },
@@ -76,7 +76,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 93712,
+                          narOffset: 101832,
                           size: 1570,
                           type: "regular",
                         },
@@ -91,7 +91,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 95816,
+                          narOffset: 103936,
                           size: 1032,
                           type: "regular",
                         },
@@ -106,7 +106,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 97376,
+                          narOffset: 105496,
                           size: 1558,
                           type: "regular",
                         },
@@ -121,7 +121,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 99464,
+                          narOffset: 107584,
                           size: 1657,
                           type: "regular",
                         },
@@ -136,7 +136,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 101656,
+                          narOffset: 109776,
                           size: 4932,
                           type: "regular",
                         },
@@ -151,7 +151,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 107120,
+                          narOffset: 115240,
                           size: 1495,
                           type: "regular",
                         },
@@ -166,7 +166,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 109144,
+                          narOffset: 117264,
                           size: 1496,
                           type: "regular",
                         },
@@ -181,7 +181,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 111168,
+                          narOffset: 119288,
                           size: 1432,
                           type: "regular",
                         },
@@ -196,7 +196,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 113128,
+                          narOffset: 121248,
                           size: 4508,
                           type: "regular",
                         },
@@ -211,7 +211,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 118168,
+                          narOffset: 126288,
                           size: 504,
                           type: "regular",
                         },
@@ -226,7 +226,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 119200,
+                          narOffset: 127320,
                           size: 5605,
                           type: "regular",
                         },
@@ -241,7 +241,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 125336,
+                          narOffset: 133456,
                           size: 4780,
                           type: "regular",
                         },
@@ -256,7 +256,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 130648,
+                          narOffset: 138768,
                           size: 1637,
                           type: "regular",
                         },
@@ -271,7 +271,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 132816,
+                          narOffset: 140936,
                           size: 1578,
                           type: "regular",
                         },
@@ -286,7 +286,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 134928,
+                          narOffset: 143048,
                           size: 1748,
                           type: "regular",
                         },
@@ -301,7 +301,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 137208,
+                          narOffset: 145328,
                           size: 480,
                           type: "regular",
                         },
@@ -316,7 +316,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 138216,
+                          narOffset: 146336,
                           size: 4960,
                           type: "regular",
                         },
@@ -331,7 +331,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 143704,
+                          narOffset: 151824,
                           size: 1778,
                           type: "regular",
                         },
@@ -346,7 +346,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 146016,
+                          narOffset: 154136,
                           size: 1377,
                           type: "regular",
                         },
@@ -361,7 +361,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 147928,
+                          narOffset: 156048,
                           size: 482,
                           type: "regular",
                         },
@@ -376,7 +376,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 148944,
+                          narOffset: 157064,
                           size: 484,
                           type: "regular",
                         },
@@ -391,7 +391,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 149960,
+                          narOffset: 158080,
                           size: 2240,
                           type: "regular",
                         },
@@ -406,7 +406,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 152728,
+                          narOffset: 160848,
                           size: 968,
                           type: "regular",
                         },
@@ -421,7 +421,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 154224,
+                          narOffset: 162344,
                           size: 1500,
                           type: "regular",
                         },
@@ -436,7 +436,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 156256,
+                          narOffset: 164376,
                           size: 963,
                           type: "regular",
                         },
@@ -451,7 +451,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 157752,
+                          narOffset: 165872,
                           size: 1528,
                           type: "regular",
                         },
@@ -466,7 +466,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 159808,
+                          narOffset: 167928,
                           size: 4955,
                           type: "regular",
                         },
@@ -481,7 +481,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 165296,
+                          narOffset: 173416,
                           size: 519,
                           type: "regular",
                         },
@@ -496,7 +496,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 166344,
+                          narOffset: 174464,
                           size: 4719,
                           type: "regular",
                         },
@@ -511,7 +511,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 171592,
+                          narOffset: 179712,
                           size: 483,
                           type: "regular",
                         },
@@ -526,7 +526,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 172608,
+                          narOffset: 180728,
                           size: 1672,
                           type: "regular",
                         },
@@ -541,7 +541,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 174808,
+                          narOffset: 182928,
                           size: 4907,
                           type: "regular",
                         },
@@ -556,7 +556,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 180248,
+                          narOffset: 188368,
                           size: 6014,
                           type: "regular",
                         },
@@ -571,7 +571,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 186792,
+                          narOffset: 194912,
                           size: 4646,
                           type: "regular",
                         },
@@ -586,7 +586,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 191968,
+                          narOffset: 200088,
                           size: 1505,
                           type: "regular",
                         },
@@ -601,7 +601,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 194008,
+                          narOffset: 202128,
                           size: 1919,
                           type: "regular",
                         },
@@ -616,7 +616,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 196456,
+                          narOffset: 204576,
                           size: 4956,
                           type: "regular",
                         },
@@ -631,7 +631,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 201944,
+                          narOffset: 210064,
                           size: 2352,
                           type: "regular",
                         },
@@ -646,7 +646,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 204824,
+                          narOffset: 212944,
                           size: 2259,
                           type: "regular",
                         },
@@ -661,7 +661,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 207616,
+                          narOffset: 215736,
                           size: 1399,
                           type: "regular",
                         },
@@ -676,7 +676,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 209544,
+                          narOffset: 217664,
                           size: 5959,
                           type: "regular",
                         },
@@ -691,7 +691,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 216032,
+                          narOffset: 224152,
                           size: 1751,
                           type: "regular",
                         },
@@ -706,7 +706,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 218312,
+                          narOffset: 226432,
                           size: 4596,
                           type: "regular",
                         },
@@ -721,7 +721,7 @@ NarInfo {
                     LC_MESSAGES: {
                       entries: {
                         "hello.mo": {
-                          narOffset: 223440,
+                          narOffset: 231560,
                           size: 1529,
                           type: "regular",
                         },
@@ -739,7 +739,7 @@ NarInfo {
                 man1: {
                   entries: {
                     "hello.1.gz": {
-                      narOffset: 225536,
+                      narOffset: 233656,
                       size: 879,
                       type: "regular",
                     },
@@ -760,57 +760,57 @@ NarInfo {
   narHash: Hash {
     algorithm: "sha256",
     hash: Uint8Array(32) [
-      204,
-      140,
-      89,
-      28,
-      166,
+      21,
+      39,
+      148,
       161,
-      192,
-      205,
-      181,
-      117,
-      172,
-      37,
-      134,
-      240,
-      220,
-      120,
-      149,
-      61,
-      149,
-      207,
+      76,
+      100,
+      230,
+      236,
+      237,
+      255,
+      33,
+      25,
+      222,
+      213,
+      254,
+      229,
       223,
-      92,
-      205,
-      159,
-      17,
-      47,
-      152,
-      52,
-      55,
-      101,
-      232,
-      117,
+      1,
+      191,
+      49,
+      177,
+      96,
+      143,
+      22,
+      41,
+      32,
+      31,
+      201,
+      69,
+      133,
+      60,
+      131,
     ],
-    raw: "sha256:0xg8clvk961g26gwsp6zryakv5bqvkq8c9dcfnswvh51lqf5k36c",
+    raw: "sha256:10rwhm2wj7r054b8yq5i66zh3pz5zvaxw691zznyrrk49jhr89qm",
   },
-  narSize: 226560,
+  narSize: 234680,
   references: [
-    "kwmqk7ygvhypxadsdaai27gl6qfxv7za-hello-2.12.1",
-    "m71p7f0nymb19yn1dascklyya2i96jfw-glibc-2.39-52",
+    "65h17wjrrlsj2rj540igylrx7fqcd6vq-glibc-2.40-36",
+    "a7hnr9dcmx3qkkn8a20g7md1wya5zc9l-hello-2.12.1",
   ],
-  sig: "cache.nixos.org-1:pSMYjCumz0gqC46TOfG7fGE8uWolJ16UVX1Fpxpj5XiETTnq8Zsv2JRlPnx1ZV2WsO6f6rT6Jfi+aaWtiJTOAQ==",
+  sig: "cache.nixos.org-1:HBx8vRSFoiXhIKtXLv7LSHdEcIH5Ji4zeADslQEKWn+j++VJpWM8ASIMQ4ilCucWkzN1SlZdqSLpNhHwWPayDA==",
   storeDir: "/nix/store",
-  storePath: "/nix/store/kwmqk7ygvhypxadsdaai27gl6qfxv7za-hello-2.12.1",
+  storePath: "/nix/store/a7hnr9dcmx3qkkn8a20g7md1wya5zc9l-hello-2.12.1",
   url: URL {
     hash: "",
     host: "cache.nixos.org",
     hostname: "cache.nixos.org",
-    href: "https://cache.nixos.org/nar/0dri9ygy83fbjmd1djlq2dfkkirx3qj0gzilmn1s85phz1mhs11p.nar.xz",
+    href: "https://cache.nixos.org/nar/1386bzhbdwk63v0jl8qdmqgjz62xxib8i7f08c03f6rvy0dvmpws.nar.xz",
     origin: "https://cache.nixos.org",
     password: "",
-    pathname: "/nar/0dri9ygy83fbjmd1djlq2dfkkirx3qj0gzilmn1s85phz1mhs11p.nar.xz",
+    pathname: "/nar/1386bzhbdwk63v0jl8qdmqgjz62xxib8i7f08c03f6rvy0dvmpws.nar.xz",
     port: "",
     protocol: "https:",
     search: "",
@@ -818,5 +818,3 @@ NarInfo {
   },
 }
 `;
-
-snapshot[`nixpkgs#hello > nar > valid 1`] = `142`;

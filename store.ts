@@ -27,7 +27,7 @@ export class BinaryCache extends Data<{
     return fetch(new URL(path, this.url), init);
   }
 
-  async narInfo(hash: string) {
+  async get(hash: string) {
     const response = await this.fetch(hash + ".narinfo");
     if (!response.ok) {
       throw new Error(`${response.status} ${response.statusText}`);

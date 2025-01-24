@@ -12,7 +12,7 @@ const out = Deno.args[0] ?? "./out";
 const cache = await BinaryCache.open(
   new URL("file:///home/tom/tmp/binary-cache"),
 );
-const info = await cache.narInfo("a7hnr9dcmx3qkkn8a20g7md1wya5zc9l");
+const info = await cache.get("a7hnr9dcmx3qkkn8a20g7md1wya5zc9l");
 
 console.log(info);
 
@@ -20,7 +20,7 @@ if (!(await info.verify(keychain))) {
   throw new Error("Invalid signature");
 }
 
-for await (const entry of await info.nar()) {
+for await (const entry of await info.files()) {
   const path = join(out, entry.path);
   console.log(`${entry.type} ${path}`);
   switch (entry.type) {

@@ -72,7 +72,6 @@ export function createNarEntryStream(listing: NarListing) {
 
   return toTransformStream<Uint8Array, StreamEntry>(async function* (stream) {
     yield* files.directory;
-    yield* files.symlink;
 
     for (const file of files.regular) {
       let stream2;
@@ -83,6 +82,8 @@ export function createNarEntryStream(listing: NarListing) {
       );
       yield { ...file, body };
     }
+
+    yield* files.symlink;
 
     await stream.cancel();
   });

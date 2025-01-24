@@ -27,12 +27,7 @@ class DataClass {
   }
 
   clone() {
-    return new (this.constructor as DataConstructor)(
-      Object.fromEntries(
-        Reflect.ownKeys(this)
-          .map((key) => [key, Reflect.get(this, key)]),
-      ),
-    );
+    return new (this.constructor as DataConstructor)(this);
   }
 }
 
