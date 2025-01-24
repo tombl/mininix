@@ -24,18 +24,11 @@ for await (const entry of await info.nar()) {
   const path = join(out, entry.path);
   console.log(`${entry.type} ${path}`);
   switch (entry.type) {
-    case "regular": {
-      const reader = entry.body.getReader();
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        console.log(value);
-      }
-      // await Deno.writeFile(path, entry.body, {
-      //   mode: entry.executable ? 0o755 : 0o644,
-      // });
+    case "regular":
+      await Deno.writeFile(path, entry.body, {
+        mode: entry.executable ? 0o755 : 0o644,
+      });
       break;
-    }
     case "symlink":
       await Deno.symlink(entry.target, path);
       break;

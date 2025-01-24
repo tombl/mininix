@@ -1,6 +1,5 @@
-import { join } from "@std/path";
-import { concat } from "@std/bytes/concat";
-import { assertEquals } from "@std/assert/equals";
+import { ByteSliceStream, toTransformStream } from "@std/streams";
+import { assertEquals } from "@std/assert";
 
 type Entry =
   | RegularEntry
@@ -69,45 +68,20 @@ export function createNarEntryStream(listing: NarListing) {
   assertEquals(listing.version, 1);
 
   const files = flatten(listing);
-  let current: {
-    file: RegularEntry & { path: string };
-    writer: WritableStreamDefaultWriter<Uint8Array>;
-  } | undefined = undefined;
-
-  // Sort the files by offset, with the first file being the first popped.
   files.regular.sort((a, b) => a.narOffset - b.narOffset);
 
-  return new TransformStream<Uint8Array, StreamEntry>({
-    start(controller) {
-      for (const entry of files.directory) controller.enqueue(entry);
-      for (const entry of files.symlink) controller.enqueue(entry);
-    },
-    transform(chunk, controller) {
-      while (chunk.length) {
-        if (!current) {
-          const file = files.regular.pop();
-          if (!file) return controller.error(new Error("trailing data"));
-          const { readable, writable } = new TransformStream<Uint8Array>();
-          controller.enqueue({ ...file, body: readable });
-          current = { file, writer: writable.getWriter() };
-        }
+  return toTransformStream<Uint8Array, StreamEntry>(async function* (stream) {
+    yield* files.directory;
+    yield* files.symlink;
 
-        const { file, writer } = current;
-        const slice = chunk.subarray(0, file.size);
+    for (const file of files.regular) {
+      let stream2;
+      [stream, stream2] = stream.tee();
 
-        writer.write(slice);
-        file.size -= slice.length;
-        chunk = chunk.subarray(slice.length);
-
-        if (file.size === 0) {
-          writer.close();
-          current = undefined;
-        }
-      }
-    },
-    flush() {
-      console.log("flush");
-      current?.writer.abort();
+      const body = stream2.pipeThrough(
+        new ByteSliceStream(file.narOffset, file.narOffset + file.size),
+      );
+      yield { ...file, body };
     }
   });
 }
