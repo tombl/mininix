@@ -1,22 +1,24 @@
 #!/usr/bin/env -S deno run -A
 import { join } from "@std/path";
 import { Keychain, NIXOS_KEY } from "./keychain.ts";
-import { BinaryCache } from "./store.ts";
+import { BinaryCache, MultiStore } from "./store.ts";
 
 const keychain = new Keychain();
 await keychain.trust(NIXOS_KEY);
 
 const out = Deno.args[0] ?? "./out";
 
-// const cache = await BinaryCache.open(new URL("https://cache.nixos.org"));
-const cache = await BinaryCache.open(
-  new URL("file:///home/tom/tmp/binary-cache"),
-);
+const cache = new MultiStore({
+  stores: [
+    await BinaryCache.open(new URL("file:///home/tom/tmp/binary-cache")),
+    await BinaryCache.open(new URL("https://cache.nixos.org")),
+  ],
+});
 const info = await cache.get("a7hnr9dcmx3qkkn8a20g7md1wya5zc9l");
 
 console.log(info);
 
-if (!(await info.verify(keychain))) {
+if (!(await info.verify(keychain)).valid) {
   throw new Error("Invalid signature");
 }
 
