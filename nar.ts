@@ -83,5 +83,7 @@ export function createNarEntryStream(listing: NarListing) {
       );
       yield { ...file, body };
     }
+
+    await stream.cancel();
   });
 }

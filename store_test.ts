@@ -1,9 +1,10 @@
 import { assertEquals, assertRejects } from "@std/assert";
+import { toArrayBuffer } from "@std/streams";
 import { assertSnapshot } from "@std/testing/snapshot";
 import { Keychain, NIXOS_KEY } from "./keychain.ts";
+import { StreamEntry } from "./nar.ts";
 import { NarInfo } from "./narinfo.ts";
 import { BinaryCache } from "./store.ts";
-import { StreamEntry } from "./nar.ts";
 
 const netPermission = await Deno.permissions.query({ name: "net" });
 
@@ -16,6 +17,20 @@ Deno.test({
     const emptyKeychain = new Keychain();
 
     let info: NarInfo;
+
+    async function consume(nar: ReadableStream<StreamEntry>) {
+      for await (const entry of nar) {
+        if (entry.type !== "regular") continue;
+        const body = await toArrayBuffer(entry.body);
+
+        if (entry.path === "bin/hello") {
+          assertEquals(
+            body.slice(0, 4),
+            new TextEncoder().encode("\x7fELF").buffer,
+          );
+        }
+      }
+    }
 
     await t.step("fetch", async (t) => {
       info = await cache.narInfo("kwmqk7ygvhypxadsdaai27gl6qfxv7za");
@@ -31,12 +46,10 @@ Deno.test({
     });
 
     await t.step("nar", async (t) => {
-      await t.step("valid", async (t) => {
+      await t.step("valid", async () => {
         const validInfo = info.clone();
         const nar = await validInfo.nar();
-        const entries: StreamEntry[] = [];
-        for await (const entry of nar) entries.push(entry);
-        await assertSnapshot(t, entries.length);
+        await consume(nar);
       });
 
       await t.step("wrong compressed size", async () => {
@@ -44,7 +57,7 @@ Deno.test({
         wrongInfo.fileSize *= 2;
         await assertRejects(async () => {
           const nar = await wrongInfo.nar();
-          for await (const _ of nar);
+          await consume(nar);
         });
       });
 
@@ -53,7 +66,7 @@ Deno.test({
         wrongInfo.narSize *= 2;
         await assertRejects(async () => {
           const nar = await wrongInfo.nar();
-          for await (const _ of nar);
+          await consume(nar);
         });
       });
 
@@ -62,7 +75,7 @@ Deno.test({
         wrongInfo.fileHash.hash[0]++;
         await assertRejects(async () => {
           const nar = await wrongInfo.nar();
-          for await (const _ of nar);
+          await consume(nar);
         });
       });
 
@@ -71,7 +84,7 @@ Deno.test({
         wrongInfo.narHash.hash[0]++;
         await assertRejects(async () => {
           const nar = await wrongInfo.nar();
-          for await (const _ of nar);
+          await consume(nar);
         });
       });
     });
