@@ -1,0 +1,22 @@
+on:
+  push:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: deno lint
+      - run: deno fmt --check
+      - run: deno check .
+      - run: deno test --allow-all --trace-leaks --coverage --junit-path junit.xml
+      - run: deno coverage
+      - uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Tests
+          path: junit.xml
+          reporter: jest-junit
