@@ -73,6 +73,7 @@ function spawn(command: string): TransformStream<Uint8Array, Uint8Array> {
     },
     async cancel(reason) {
       await stdin.abort(reason);
+      proc.kill();
     },
   });
 }

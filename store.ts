@@ -3,7 +3,7 @@ import { NarInfo } from "./narinfo.ts";
 import { Data, parseKeyValue } from "./util.ts";
 
 export interface Store {
-  get(hash: string): Promise<NarInfo>;
+  get(hash: string, options?: { signal?: AbortSignal }): Promise<NarInfo>;
 }
 
 export class BinaryCache extends Data<{
@@ -31,14 +31,14 @@ export class BinaryCache extends Data<{
     return fetch(new URL(path, this.url), init);
   }
 
-  async get(hash: string) {
-    const response = await this.#fetch(hash + ".narinfo");
+  async get(hash: string, { signal }: { signal?: AbortSignal } = {}) {
+    const response = await this.#fetch(hash + ".narinfo", { signal });
     if (!response.ok) {
       throw new Error(`${response.status} ${response.statusText}`);
     }
     const text = await response.text();
 
-    const listingResponse = await this.#fetch(hash + ".ls");
+    const listingResponse = await this.#fetch(hash + ".ls", { signal });
     if (!listingResponse.ok) {
       throw new Error(
         `${listingResponse.status} ${listingResponse.statusText}`,
@@ -51,11 +51,11 @@ export class BinaryCache extends Data<{
 }
 
 export class MultiStore extends Data<{ stores: Store[] }> implements Store {
-  async get(hash: string) {
+  async get(hash: string, options?: { signal?: AbortSignal }) {
     let error;
     for (const store of this.stores) {
       try {
-        return await store.get(hash);
+        return await store.get(hash, options);
       } catch (e) {
         error = e;
       }

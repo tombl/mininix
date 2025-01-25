@@ -30,13 +30,13 @@ const binaryCache = {
 };
 
 const narInfo = NarInfo.parse(INFO, binaryCache, EMPTY_NAR_LISTING);
+const keychain = await Keychain.create([NIXOS_KEY]);
 
-Deno.test("NarInfo fingerprint", () => {
+Deno.test("fingerprint", () => {
   assertEquals(narInfo.fingerprint(), FINGERPRINT);
 });
 
-Deno.test("NarInfo signature verification", async (t) => {
-  const keychain = await Keychain.create([NIXOS_KEY]);
+Deno.test("signature verification", async (t) => {
   await t.step("valid", async () => {
     assertEquals(await narInfo.verify(keychain), { valid: true });
   });
@@ -57,4 +57,25 @@ Deno.test("NarInfo signature verification", async (t) => {
       reason: "INVALID_SIGNATURE",
     });
   });
+});
+
+Deno.test("empty references", async () => {
+  const info = NarInfo.parse(
+    `
+StorePath: /nix/store/acfkqzj5qrqs88a4a6ixnybbjxja663d-xgcc-14-20241116-libgcc
+URL: nar/05wlgdfa54n8fgyjscnr0r8bafmmcmc94h4xqwbdxibi9f0sxaj5.nar.xz
+Compression: xz
+FileHash: sha256:05wlgdfa54n8fgyjscnr0r8bafmmcmc94h4xqwbdxibi9f0sxaj5
+FileSize: 73960
+NarHash: sha256:0ysyzr56jyavf6xcybywjs3s5742b9kbvqq644khbak7d5y3fjnk
+NarSize: 201856
+References: 
+Deriver: zcnm48hqxy3la7173czz5b7nxidssfxi-xgcc-14-20241116.drv
+Sig: cache.nixos.org-1:xNltk6czOa3UXXEQ/mGMhr1Gzlt/OcT4P1QB7BKJ5dGSBGwhdgkocD2PKYwNiN1WB41AqEM9N69151pXFLasAA==
+`,
+    binaryCache,
+    EMPTY_NAR_LISTING,
+  );
+  assertEquals(info.references, []);
+  assertEquals(await info.verify(keychain), { valid: true });
 });

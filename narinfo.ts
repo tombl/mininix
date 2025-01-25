@@ -23,8 +23,8 @@ export class NarInfo extends Data<{
   deriver: string;
   sig: string;
 }> {
-  async files() {
-    const response = await fetch(this.url);
+  async files({ signal }: { signal?: AbortSignal } = {}) {
+    const response = await fetch(this.url, { signal });
     if (!response.ok) {
       throw new Error(`${response.status} ${response.statusText}`);
     }
@@ -77,7 +77,7 @@ export class NarInfo extends Data<{
       narHash: new Hash(data.NarHash),
       fileSize: parseInt(data.FileSize),
       narSize: parseInt(data.NarSize),
-      references: data.References.split(" "),
+      references: data.References.split(" ").filter(Boolean),
       deriver: data.Deriver,
       sig: data.Sig,
     });

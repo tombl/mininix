@@ -1,5 +1,6 @@
 import { ByteSliceStream, toTransformStream } from "@std/streams";
 import { assertEquals } from "@std/assert";
+import { sortBy } from "@std/collections";
 
 type Entry =
   | RegularEntry
@@ -68,7 +69,7 @@ export function createNarEntryStream(listing: NarListing) {
   assertEquals(listing.version, 1);
 
   const files = flatten(listing);
-  files.regular.sort((a, b) => a.narOffset - b.narOffset);
+  sortBy(files.regular, (f) => f.narOffset, { order: "asc" });
 
   return toTransformStream<Uint8Array, StreamEntry>(async function* (stream) {
     yield* files.directory;
