@@ -1,16 +1,67 @@
 #!/usr/bin/env -S deno run -A
+import { Database } from "@db/sqlite";
+import { parseArgs } from "@std/cli";
 import { join } from "@std/path";
 import Queue from "p-queue";
+import { createDecompressionStream } from "./compression.ts";
 import { Keychain, NIXOS_KEY } from "./keychain.ts";
 import { NarInfo } from "./narinfo.ts";
 import { BinaryCache, MultiStore } from "./store.ts";
 import { splitOnce } from "./util.ts";
 
+const DB_PATH = "x86_64-linux-unstable.db";
+const DB_URL =
+  "https://github.com/tombl/nixpkgs-preeval/releases/download/2025-01-26/x86_64-linux-unstable.db.zst";
+
+if (!(await Deno.stat(DB_PATH).then((f) => f.isFile, () => false))) {
+  const res = await fetch(DB_URL);
+  await Deno.writeFile(
+    DB_PATH,
+    res.body!.pipeThrough(createDecompressionStream("zstd")),
+  );
+}
+
+const db = new Database(DB_PATH, { readonly: true, create: false });
+
 const keychain = new Keychain();
 await keychain.trust(NIXOS_KEY);
 
-const storeDir = Deno.args[0] ?? "./out";
-const hash = Deno.args[1] ?? "a7hnr9dcmx3qkkn8a20g7md1wya5zc9l-hello"; // hello-2.12.1
+const HELP = `Usage: mininix [options] <package>...
+
+Options:
+  -h, --help             Show this help message and exit
+  --store-dir <dir>      Directory to install packages to (default: ./out)
+  --substituter <url>... Additional binary cache URLs to use
+`;
+
+const args = parseArgs(Deno.args, {
+  boolean: ["help"],
+  collect: ["substituter"],
+  string: ["store-dir"],
+  default: { "store-dir": "./out", substituter: [] },
+  alias: { h: "help" },
+  unknown(arg) {
+    console.error(`Unknown option: ${arg}\n`);
+    console.log(HELP);
+    Deno.exit(1);
+  },
+});
+
+if (args.help) {
+  console.log(HELP);
+  Deno.exit(0);
+}
+
+const requestedPackages = db
+  .sql`select name, hash, full_name from packages where name in (${args._})`;
+
+if (requestedPackages.length !== args._.length) {
+  const missing = args._.filter((name) =>
+    !requestedPackages.some((p) => p.name === name)
+  );
+  console.error(`Unknown packages: ${missing.join(", ")}`);
+  Deno.exit(1);
+}
 
 async function extract(storeDir: string, info: NarInfo, signal?: AbortSignal) {
   const stat = await Deno.lstat(storeDir).catch(() => null);
@@ -46,20 +97,25 @@ async function extract(storeDir: string, info: NarInfo, signal?: AbortSignal) {
   }
 }
 
-const nixosCache = await BinaryCache.open(new URL("https://cache.nixos.org"));
+const stores = await Promise.all(
+  ["https://cache.nixos.org", ...args.substituter].map((url) =>
+    BinaryCache.open(new URL(String(url)))
+  ),
+);
 
-const cache = new MultiStore({
-  stores: [
-    await BinaryCache.open(new URL("file:///home/tom/tmp/binary-cache")),
-    nixosCache,
-  ],
-});
+const cache = new MultiStore({ stores });
 
 const controller = new AbortController();
 Deno.addSignalListener("SIGINT", () => controller.abort());
 const { signal } = controller;
 
-const queue = new Queue({ concurrency: nixosCache.wantMassQuery ? 32 : 4 });
+const queue = new Queue({
+  concurrency: stores.every((s) =>
+      s.wantMassQuery || s.url.protocol === "file:"
+    )
+    ? 32
+    : 4,
+});
 
 const seen = new Set<string>();
 
@@ -77,7 +133,7 @@ async function traverse(fullName: string) {
     async ({ signal }) => {
       console.log(`Installing ${name}`);
       await extract(
-        info.storePath.replace(info.storeDir, storeDir),
+        info.storePath.replace(info.storeDir, args["store-dir"]),
         info,
         signal,
       );
@@ -87,5 +143,8 @@ async function traverse(fullName: string) {
   );
 }
 
-await traverse(hash);
+for (const { hash, full_name } of requestedPackages) {
+  traverse(`${hash}-${full_name}`);
+}
+
 await queue.onIdle();
