@@ -6,8 +6,8 @@ import {
 } from "./compression.ts";
 import { Hash, LengthVerifierStream } from "./hash.ts";
 import { Keychain } from "./keychain.ts";
-import { Data, parseKeyValue } from "./util.ts";
-import { createNarEntryStream, NarListing } from "./nar.ts";
+import { Data, parseKeyValue, ProgressReportingStream } from "./util.ts";
+import { countNarEntries, createNarEntryStream, NarListing } from "./nar.ts";
 
 export class NarInfo extends Data<{
   storeDir: string;
@@ -23,19 +23,41 @@ export class NarInfo extends Data<{
   deriver: string;
   sig: string;
 }> {
-  async files({ signal }: { signal?: AbortSignal } = {}) {
+  async files(
+    {
+      signal,
+      onProgress,
+    }: {
+      signal?: AbortSignal;
+      onProgress?: (current: number, total: number) => void;
+    } = {},
+  ) {
     const response = await fetch(this.url, { signal });
     if (!response.ok) {
       throw new Error(`${response.status} ${response.statusText}`);
     }
+    let body = response.body!;
 
-    return response.body!
+    if (onProgress) {
+      onProgress(0, this.fileSize);
+      body = body.pipeThrough(
+        new ProgressReportingStream((current) => {
+          onProgress?.(current, this.fileSize);
+        }),
+      );
+    }
+
+    return body
       .pipeThrough(new LengthVerifierStream(this.fileSize))
       .pipeThrough(this.fileHash.createVerifierStream())
       .pipeThrough(createDecompressionStream(this.compression))
       .pipeThrough(new LengthVerifierStream(this.narSize))
       .pipeThrough(this.narHash.createVerifierStream())
       .pipeThrough(createNarEntryStream(this.listing));
+  }
+
+  fileCount() {
+    return countNarEntries(this.listing);
   }
 
   verify(keychain: Keychain) {

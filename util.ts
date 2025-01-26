@@ -32,3 +32,17 @@ class DataClass {
 }
 
 export const Data = DataClass as DataConstructor;
+
+export class ProgressReportingStream extends TransformStream {
+  bytes = 0;
+
+  constructor(report: (bytes: number) => void) {
+    super({
+      transform: (chunk, controller) => {
+        controller.enqueue(chunk);
+        this.bytes += chunk.length;
+        report(this.bytes);
+      },
+    });
+  }
+}

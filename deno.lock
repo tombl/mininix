@@ -18,6 +18,7 @@
     "jsr:@std/encoding@^1.0.6": "1.0.6",
     "jsr:@std/fmt@0.221": "0.221.0",
     "jsr:@std/fs@0.221": "0.221.0",
+    "jsr:@std/fs@^1.0.10": "1.0.10",
     "jsr:@std/fs@^1.0.9": "1.0.10",
     "jsr:@std/internal@^1.0.5": "1.0.5",
     "jsr:@std/path@0.217": "0.217.0",
@@ -258,6 +259,9 @@
         "strip-ansi"
       ]
     }
+  },
+  "remote": {
+    "https://raw.githubusercontent.com/tombl/superconsole/9bac929/mod.ts": "fab518032197843094a8770d1f0bd9ee6c0a706a1f3ac88d1b6c2d90cf3c6e26"
   },
   "workspace": {
     "dependencies": [
