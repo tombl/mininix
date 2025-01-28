@@ -1,4 +1,3 @@
-import { NarListing } from "./nar.ts";
 import { NarInfo } from "./narinfo.ts";
 import { Data, parseKeyValue } from "./util.ts";
 
@@ -16,7 +15,9 @@ export class BinaryCache extends Data<{
     if (!url.pathname.endsWith("/")) url = new URL(url.href + "/");
     const response = await fetch(new URL("nix-cache-info", url));
     if (!response.ok) {
-      throw new Error(`${response.status} ${response.statusText}`);
+      throw new Error(
+        `${response.status} ${response.statusText} at ${url}/nix-cache-info`,
+      );
     }
     const data = parseKeyValue(await response.text(), ": ");
     return new BinaryCache({
@@ -27,35 +28,36 @@ export class BinaryCache extends Data<{
     });
   }
 
-  #fetch(path: string, init?: RequestInit) {
-    return fetch(new URL(path, this.url), init);
+  async #fetch(path: string, init?: RequestInit) {
+    const url = new URL(path, this.url);
+    const response = await fetch(url, init);
+    if (!response.ok) {
+      throw new Error(`${response.status} ${response.statusText} at ${url}`);
+    }
+    return response;
   }
 
   async get(hash: string, { signal }: { signal?: AbortSignal } = {}) {
     const response = await this.#fetch(hash + ".narinfo", { signal });
-    if (!response.ok) {
-      throw new Error(`${response.status} ${response.statusText}`);
-    }
-    const text = await response.text();
-
-    const listingResponse = await this.#fetch(hash + ".ls", { signal });
-    if (!listingResponse.ok) {
-      throw new Error(
-        `${listingResponse.status} ${listingResponse.statusText}`,
-      );
-    }
-    const listing: NarListing = await listingResponse.json();
-
-    return NarInfo.parse(text, this, listing);
+    return NarInfo.parse(
+      await response.text(),
+      this,
+      new URL(hash + ".ls", this.url),
+    );
   }
 }
 
 export class MultiStore extends Data<{ stores: Store[] }> implements Store {
-  async get(hash: string, options?: { signal?: AbortSignal }) {
+  async get(
+    hash: string,
+    options?: { signal?: AbortSignal },
+  ): Promise<NarInfo & { storeIndex: number }> {
     let error;
-    for (const store of this.stores) {
+    for (let i = 0; i < this.stores.length; i++) {
+      const store = this.stores[i];
       try {
-        return await store.get(hash, options);
+        const info = await store.get(hash, options);
+        return Object.assign(info, { storeIndex: i });
       } catch (e) {
         error = e;
       }

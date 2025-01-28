@@ -6,14 +6,13 @@ import {
 } from "./compression.ts";
 import { Hash, LengthVerifierStream } from "./hash.ts";
 import { Keychain } from "./keychain.ts";
+import { createNarEntryStream } from "./nar.ts";
 import { Data, parseKeyValue, ProgressReportingStream } from "./util.ts";
-import { countNarEntries, createNarEntryStream, NarListing } from "./nar.ts";
 
 export class NarInfo extends Data<{
   storeDir: string;
-  listing: NarListing;
   storePath: string;
-  url: URL;
+  narURL: URL;
   compression: CompressionAlgorithm;
   fileHash: Hash;
   narHash: Hash;
@@ -22,6 +21,8 @@ export class NarInfo extends Data<{
   references: string[];
   deriver: string;
   sig: string;
+  raw: string;
+  listingURL: URL;
 }> {
   async files(
     {
@@ -32,11 +33,20 @@ export class NarInfo extends Data<{
       onProgress?: (current: number, total: number) => void;
     } = {},
   ) {
-    const response = await fetch(this.url, { signal });
-    if (!response.ok) {
-      throw new Error(`${response.status} ${response.statusText}`);
+    const [listing, nar] = await Promise.all([
+      fetch(this.listingURL, { signal }),
+      fetch(this.narURL, { signal }),
+    ]);
+    if (!listing.ok) {
+      throw new Error(
+        `${listing.status} ${listing.statusText} ${this.listingURL}`,
+      );
     }
-    let body = response.body!;
+    if (!nar.ok) {
+      throw new Error(`${nar.status} ${nar.statusText} ${this.narURL}`);
+    }
+
+    let body = nar.body!;
 
     if (onProgress) {
       onProgress(0, this.fileSize);
@@ -53,11 +63,7 @@ export class NarInfo extends Data<{
       .pipeThrough(createDecompressionStream(this.compression))
       .pipeThrough(new LengthVerifierStream(this.narSize))
       .pipeThrough(this.narHash.createVerifierStream())
-      .pipeThrough(createNarEntryStream(this.listing));
-  }
-
-  fileCount() {
-    return countNarEntries(this.listing);
+      .pipeThrough(createNarEntryStream(await listing.json()));
   }
 
   verify(keychain: Keychain) {
@@ -80,7 +86,7 @@ export class NarInfo extends Data<{
   static parse(
     text: string,
     binaryCache: { storeDir: string; url: URL },
-    listing: NarListing,
+    listingURL: URL,
   ) {
     const data = parseKeyValue(text, ": ");
 
@@ -91,9 +97,8 @@ export class NarInfo extends Data<{
 
     return new NarInfo({
       storeDir: binaryCache.storeDir,
-      listing,
       storePath: data.StorePath,
-      url: new URL(data.URL, binaryCache.url),
+      narURL: new URL(data.URL, binaryCache.url),
       compression: data.Compression,
       fileHash: new Hash(data.FileHash),
       narHash: new Hash(data.NarHash),
@@ -102,6 +107,8 @@ export class NarInfo extends Data<{
       references: data.References.split(" ").filter(Boolean),
       deriver: data.Deriver,
       sig: data.Sig,
+      raw: text,
+      listingURL,
     });
   }
 }

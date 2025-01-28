@@ -89,7 +89,3 @@ export function createNarEntryStream(listing: NarListing) {
     await stream.cancel();
   });
 }
-
-export function countNarEntries(listing: NarListing) {
-  return walk(listing.root, []).reduce((acc) => acc + 1, 0);
-}
