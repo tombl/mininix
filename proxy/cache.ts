@@ -1,9 +1,5 @@
 import { assert } from "@std/assert/assert";
 import { join } from "@std/path/join";
-import {
-  createDecompressionStream,
-  getCompressionAlgorithmFromExtension,
-} from "../compression.ts";
 import { isNarListing, NarListing } from "../nar.ts";
 import { NarInfo } from "../narinfo.ts";
 import { Store } from "../store.ts";
@@ -33,31 +29,7 @@ export class FsCache implements Store {
     const path = join(this.#dir, hash + ".narinfo");
     const text = await Deno.readTextFile(path, options);
 
-    const compressedInfo = NarInfo.parse(text, this, hash);
-    const info = compressedInfo.clone();
-
-    info.compression = "none";
-
-    // trim compression extension
-    const dotNarIndex = info.narPathname.lastIndexOf(".nar");
-    assert(dotNarIndex !== -1);
-    info.narPathname = info.narPathname.slice(0, dotNarIndex) + ".nar";
-
-    try {
-      // if the nar is in the cache, return the uncompressed info
-      const response = await this.getNar(info);
-      await response.body!.cancel();
-      return info;
-    } catch (error) {
-      console.error(
-        "nar not found",
-        info.narPathname,
-        compressedInfo.narPathname,
-        error,
-      );
-      // otherwise, return the compressed info
-      return compressedInfo;
-    }
+    return NarInfo.parse(text, this, hash);
   }
 
   async putListing(hash: string, listing: NarListing) {
@@ -75,34 +47,18 @@ export class FsCache implements Store {
   }
 
   async putNar(pathname: string, response: Response) {
-    const idx = pathname.lastIndexOf(".nar");
-    assert(idx !== -1);
-
     assert(pathname.startsWith("nar/"));
-    const hash = pathname.slice("nar/".length, idx);
-
-    const path = join(this.#dir, "nar", hash + ".nar");
-
-    const body = response.body!.pipeThrough(
-      createDecompressionStream(
-        getCompressionAlgorithmFromExtension(response.url),
-      ),
-    );
-
-    await Deno.writeFile(path, body);
+    const path = join(this.#dir, pathname);
+    await Deno.writeFile(path, response.body!);
   }
   async getNar(
     info: { narPathname: string },
     options?: { signal?: AbortSignal },
   ): Promise<Response> {
-    if (!info.narPathname.endsWith(".nar")) {
-      throw new Error("this store only supports uncompressed nars");
-    }
     assert(info.narPathname.startsWith("nar/"));
-
-    const path = join(this.#dir, "nar", info.narPathname.slice("nar/".length));
-
+    const path = join(this.#dir, info.narPathname);
     const body = await Deno.open(path, { read: true });
+
     options?.signal?.addEventListener("abort", () => body.close());
 
     console.log("NAR HIT", info.narPathname);
