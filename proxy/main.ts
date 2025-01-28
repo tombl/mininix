@@ -70,7 +70,11 @@ Deno.serve(
         return new Response("nar not found", { status: 404 });
       }
 
-      void localCache.putInfo(hash, info).catch(console.error);
+      const index = store.getIndex(info);
+      assert(index !== undefined);
+      if (index !== 0) {
+        void localCache.putInfo(hash, info).catch(console.error);
+      }
 
       return new Response(info.raw, {
         headers: { "content-type": "text/x-nix-narinfo" },
@@ -86,7 +90,11 @@ Deno.serve(
         return new Response("listing not found", { status: 404 });
       }
 
-      void localCache.putListing(hash, listing).catch(console.error);
+      const index = store.getIndex(listing);
+      assert(index !== undefined);
+      if (index !== 0) {
+        void localCache.putListing(hash, listing).catch(console.error);
+      }
 
       return new Response(JSON.stringify(listing), {
         headers: { "content-type": "application/json" },
@@ -97,13 +105,16 @@ Deno.serve(
       let response;
       try {
         response = await store.getNar({ narPathname: pathname.slice(1) });
-      } catch (error) {
-        console.error("nar not found", pathname, error);
+      } catch {
         return new Response("nar not found", { status: 404 });
       }
 
-      void localCache.putNar(pathname.slice(1), response.clone())
-        .catch(console.error);
+      const index = store.getIndex(response);
+      assert(index !== undefined);
+      if (index !== 0) {
+        void localCache.putNar(pathname.slice(1), response.clone())
+          .catch(console.error);
+      }
 
       return response;
     }

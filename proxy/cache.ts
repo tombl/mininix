@@ -49,7 +49,8 @@ export class FsCache implements Store {
   async putNar(pathname: string, response: Response) {
     assert(pathname.startsWith("nar/"));
     const path = join(this.#dir, pathname);
-    await Deno.writeFile(path, response.body!);
+    await Deno.writeFile(path + ".tmp", response.body!);
+    await Deno.rename(path + ".tmp", path);
   }
   async getNar(
     info: { narPathname: string },
