@@ -12,7 +12,6 @@ import { Data, parseKeyValue, ProgressReportingStream } from "./util.ts";
 
 export class NarInfo extends Data<{
   store: Store;
-  raw: string;
   hash: string;
 
   storePath: string;
@@ -88,7 +87,6 @@ export class NarInfo extends Data<{
 
     return new NarInfo({
       store,
-      raw: text,
       hash,
 
       narPathname: data.URL,
@@ -102,5 +100,20 @@ export class NarInfo extends Data<{
       deriver: data.Deriver,
       sig: data.Sig,
     });
+  }
+
+  get raw(): string {
+    return [
+      `URL: ${this.narPathname}`,
+      `StorePath: ${this.storePath}`,
+      `Compression: ${this.compression}`,
+      `FileHash: ${this.fileHash.raw}`,
+      `NarHash: ${this.narHash.raw}`,
+      `FileSize: ${this.fileSize}`,
+      `NarSize: ${this.narSize}`,
+      `References: ${this.references.join(" ")}`,
+      `Deriver: ${this.deriver}`,
+      `Sig: ${this.sig}`,
+    ].join("\n") + "\n";
   }
 }

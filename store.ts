@@ -55,6 +55,7 @@ export class BinaryCache extends Data<{
   }
 
   async getInfo(hash: string, options?: { signal?: AbortSignal }) {
+    console.log("INFO MISS", hash);
     const response = await this.#fetch(hash + ".narinfo", options);
     return NarInfo.parse(await response.text(), this, hash);
   }
@@ -73,6 +74,7 @@ export class BinaryCache extends Data<{
     info: { narPathname: string },
     options: { signal?: AbortSignal } = {},
   ) {
+    console.log("NAR MISS", info.narPathname);
     return this.#fetch(info.narPathname, options);
   }
 }
