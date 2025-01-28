@@ -53,8 +53,6 @@ export class FsCache implements Store {
   async putNar(pathname: string, response: Response) {
     const path = join(this.#dir, getNarHash(pathname) + ".nar");
 
-    console.log("caching", pathname, "to", path, "...", response.headers);
-
     const body = response.body!.pipeThrough(
       createDecompressionStream(
         getCompressionAlgorithmFromExtension(response.url),

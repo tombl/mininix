@@ -48,7 +48,11 @@ Deno.serve(
   async (request) => {
     const { signal } = request;
     const { pathname } = new URL(request.url, "http://host.invalid");
-    console.log(pathname);
+
+    if (!(request.method === "GET" || request.method === "HEAD")) {
+      // TODO: support PUT?
+      return new Response("method not allowed", { status: 405 });
+    }
 
     if (pathname === "/nix-cache-info") {
       return new Response(
@@ -63,7 +67,12 @@ Deno.serve(
 
     if (pathname.endsWith(".narinfo")) {
       const hash = pathname.slice(1, -".narinfo".length);
-      const info = await store.getInfo(hash, { signal });
+      let info;
+      try {
+        info = await store.getInfo(hash, { signal });
+      } catch {
+        return new Response("nar not found", { status: 404 });
+      }
 
       if (info.narPathname.startsWith("nar/")) {
         const index = store.getIndex(info);
@@ -76,7 +85,7 @@ Deno.serve(
         );
       }
 
-      void localCache.putInfo(hash, info);
+      void localCache.putInfo(hash, info).catch(console.error);
 
       return new Response(info.raw, {
         headers: { "content-type": "text/x-nix-narinfo" },
@@ -85,9 +94,14 @@ Deno.serve(
 
     if (pathname.endsWith(".ls")) {
       const hash = pathname.slice(1, -".ls".length);
-      const listing = await store.getListing(hash, { signal });
+      let listing;
+      try {
+        listing = await store.getListing(hash, { signal });
+      } catch {
+        return new Response("listing not found", { status: 404 });
+      }
 
-      void localCache.putListing(hash, listing);
+      void localCache.putListing(hash, listing).catch(console.error);
 
       return new Response(JSON.stringify(listing), {
         headers: { "content-type": "application/json" },
@@ -98,25 +112,35 @@ Deno.serve(
       const storeIndex = associatedStores.get(pathname.slice(1));
       if (storeIndex !== undefined) {
         const upstream = store.stores[storeIndex];
-        const response = await upstream.getNar(
-          { narPathname: pathname },
-          { signal },
-        );
+        let response;
+        try {
+          response = await upstream.getNar(
+            { narPathname: pathname },
+            { signal },
+          );
+        } catch {
+          return new Response("nar not found", { status: 404 });
+        }
 
-        void localCache.putNar(pathname, response.clone());
+        void localCache.putNar(pathname, response.clone()).catch(console.error);
 
         return response;
       }
     }
 
     // fallback path for unhandled requests: blindly proxy to the first upstream that responds
-    console.warn("no handler for", pathname);
     let response = new Response("no stores configured", { status: 500 });
 
     for (const upstream of store.stores) {
       if (!(upstream instanceof BinaryCache)) continue;
       response = await fetch(new URL(pathname, upstream.url), request);
       if (response.ok) break;
+    }
+
+    if (pathname.startsWith("/nar/")) {
+      void localCache.putNar(pathname, response.clone()).catch(console.error);
+    } else {
+      console.warn("no handler for", pathname);
     }
 
     return response;
