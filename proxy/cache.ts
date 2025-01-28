@@ -1,30 +1,25 @@
 import { assert } from "@std/assert/assert";
 import { join } from "@std/path/join";
-import {
-  createDecompressionStream,
-  getCompressionAlgorithmFromExtension,
-} from "../compression.ts";
+import { isNarListing, NarListing } from "../nar.ts";
 import { NarInfo } from "../narinfo.ts";
 import { Store } from "../store.ts";
-import { isNarListing, NarListing } from "../nar.ts";
-
-function getNarHash(pathname: string) {
-  const idx = pathname.lastIndexOf(".nar");
-  assert(idx !== -1);
-  assert(pathname.startsWith("/nar/"));
-  return pathname.slice("/nar/".length, idx);
-}
 
 export class FsCache implements Store {
   storeDir = "/nix/store";
 
   #dir: string;
-  constructor(dir: string) {
+  private constructor(dir: string) {
     this.#dir = dir;
+  }
+
+  static async open(dir: string): Promise<FsCache> {
+    await Deno.mkdir(join(dir, "nar"), { recursive: true });
+    return new FsCache(dir);
   }
 
   async putInfo(hash: string, info: NarInfo) {
     const path = join(this.#dir, hash);
+
     await Deno.writeTextFile(path + ".narinfo", info.raw);
   }
   async getInfo(
@@ -33,6 +28,7 @@ export class FsCache implements Store {
   ): Promise<NarInfo> {
     const path = join(this.#dir, hash + ".narinfo");
     const text = await Deno.readTextFile(path, options);
+
     return NarInfo.parse(text, this, hash);
   }
 
@@ -51,25 +47,19 @@ export class FsCache implements Store {
   }
 
   async putNar(pathname: string, response: Response) {
-    const path = join(this.#dir, getNarHash(pathname) + ".nar");
-
-    console.log("caching", pathname, "to", path, "...", response.headers);
-
-    const body = response.body!.pipeThrough(
-      createDecompressionStream(
-        getCompressionAlgorithmFromExtension(response.url),
-      ),
-    );
-
-    await Deno.writeFile(path, body);
+    assert(pathname.startsWith("nar/"));
+    const path = join(this.#dir, pathname);
+    await Deno.writeFile(path + ".tmp", response.body!);
+    await Deno.rename(path + ".tmp", path);
   }
   async getNar(
     info: { narPathname: string },
     options?: { signal?: AbortSignal },
   ): Promise<Response> {
-    const path = join(this.#dir, getNarHash(info.narPathname) + ".nar");
-
+    assert(info.narPathname.startsWith("nar/"));
+    const path = join(this.#dir, info.narPathname);
     const body = await Deno.open(path, { read: true });
+
     options?.signal?.addEventListener("abort", () => body.close());
 
     // TODO: check that closing the body closes the file

@@ -91,6 +91,8 @@ export class MultiStore extends Data<{ stores: Store[] }> implements Store {
     return this.#indexes.get(object);
   }
 
+  hits: number[] = [];
+  misses = 0;
   async #find<T extends object>(fn: (store: Store) => Promise<T>): Promise<T> {
     const errors = [];
     for (let i = 0; i < this.stores.length; i++) {
@@ -98,11 +100,14 @@ export class MultiStore extends Data<{ stores: Store[] }> implements Store {
       try {
         const value = await fn(store);
         this.#indexes.set(value, i);
+        this.hits[i] ??= 0;
+        this.hits[i]++;
         return value;
       } catch (error) {
         errors.push(error);
       }
     }
+    this.misses++;
     throw new AggregateError(errors, "all stores failed");
   }
 
