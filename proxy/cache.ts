@@ -62,8 +62,6 @@ export class FsCache implements Store {
 
     options?.signal?.addEventListener("abort", () => body.close());
 
-    console.log("NAR HIT", info.narPathname);
-
     // TODO: check that closing the body closes the file
     return new Response(body.readable, {
       headers: { "content-type": "application/x-nix-nar" },

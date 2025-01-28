@@ -55,7 +55,6 @@ export class BinaryCache extends Data<{
   }
 
   async getInfo(hash: string, options?: { signal?: AbortSignal }) {
-    console.log("INFO MISS", hash);
     const response = await this.#fetch(hash + ".narinfo", options);
     return NarInfo.parse(await response.text(), this, hash);
   }
@@ -74,7 +73,6 @@ export class BinaryCache extends Data<{
     info: { narPathname: string },
     options: { signal?: AbortSignal } = {},
   ) {
-    console.log("NAR MISS", info.narPathname);
     return this.#fetch(info.narPathname, options);
   }
 }
@@ -93,6 +91,8 @@ export class MultiStore extends Data<{ stores: Store[] }> implements Store {
     return this.#indexes.get(object);
   }
 
+  hits: number[] = [];
+  misses = 0;
   async #find<T extends object>(fn: (store: Store) => Promise<T>): Promise<T> {
     const errors = [];
     for (let i = 0; i < this.stores.length; i++) {
@@ -100,11 +100,14 @@ export class MultiStore extends Data<{ stores: Store[] }> implements Store {
       try {
         const value = await fn(store);
         this.#indexes.set(value, i);
+        this.hits[i] ??= 0;
+        this.hits[i]++;
         return value;
       } catch (error) {
         errors.push(error);
       }
     }
+    this.misses++;
     throw new AggregateError(errors, "all stores failed");
   }
 
