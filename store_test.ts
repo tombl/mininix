@@ -34,7 +34,7 @@ Deno.test({
     }
 
     await t.step("fetch", async (t) => {
-      info = await cache.get("a7hnr9dcmx3qkkn8a20g7md1wya5zc9l");
+      info = await cache.getInfo("a7hnr9dcmx3qkkn8a20g7md1wya5zc9l");
       await assertSnapshot(t, info);
     });
 

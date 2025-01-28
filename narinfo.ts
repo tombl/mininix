@@ -7,12 +7,16 @@ import {
 import { Hash, LengthVerifierStream } from "./hash.ts";
 import { Keychain } from "./keychain.ts";
 import { createNarEntryStream } from "./nar.ts";
+import { Store } from "./store.ts";
 import { Data, parseKeyValue, ProgressReportingStream } from "./util.ts";
 
 export class NarInfo extends Data<{
-  storeDir: string;
+  store: Store;
+  raw: string;
+  hash: string;
+
   storePath: string;
-  narURL: URL;
+  narPathname: string;
   compression: CompressionAlgorithm;
   fileHash: Hash;
   narHash: Hash;
@@ -21,38 +25,25 @@ export class NarInfo extends Data<{
   references: string[];
   deriver: string;
   sig: string;
-  raw: string;
-  listingURL: URL;
 }> {
   async files(
-    {
-      signal,
-      onProgress,
-    }: {
+    options?: {
       signal?: AbortSignal;
       onProgress?: (current: number, total: number) => void;
-    } = {},
+    },
   ) {
     const [listing, nar] = await Promise.all([
-      fetch(this.listingURL, { signal }),
-      fetch(this.narURL, { signal }),
+      this.store.getListing(this.hash, options),
+      this.store.getNar(this, options),
     ]);
-    if (!listing.ok) {
-      throw new Error(
-        `${listing.status} ${listing.statusText} ${this.listingURL}`,
-      );
-    }
-    if (!nar.ok) {
-      throw new Error(`${nar.status} ${nar.statusText} ${this.narURL}`);
-    }
-
     let body = nar.body!;
 
-    if (onProgress) {
+    if (options?.onProgress) {
+      const { onProgress } = options;
       onProgress(0, this.fileSize);
       body = body.pipeThrough(
         new ProgressReportingStream((current) => {
-          onProgress?.(current, this.fileSize);
+          onProgress(current, this.fileSize);
         }),
       );
     }
@@ -63,7 +54,7 @@ export class NarInfo extends Data<{
       .pipeThrough(createDecompressionStream(this.compression))
       .pipeThrough(new LengthVerifierStream(this.narSize))
       .pipeThrough(this.narHash.createVerifierStream())
-      .pipeThrough(createNarEntryStream(await listing.json()));
+      .pipeThrough(createNarEntryStream(listing));
   }
 
   verify(keychain: Keychain) {
@@ -79,14 +70,14 @@ export class NarInfo extends Data<{
       this.storePath,
       this.narHash.raw,
       this.narSize.toFixed(0),
-      this.references.map((ref) => `${this.storeDir}/${ref}`).join(","),
+      this.references.map((ref) => `${this.store.storeDir}/${ref}`).join(","),
     ].join(";");
   }
 
   static parse(
     text: string,
-    binaryCache: { storeDir: string; url: URL },
-    listingURL: URL,
+    store: Store,
+    hash: string,
   ) {
     const data = parseKeyValue(text, ": ");
 
@@ -96,9 +87,12 @@ export class NarInfo extends Data<{
     );
 
     return new NarInfo({
-      storeDir: binaryCache.storeDir,
+      store,
+      raw: text,
+      hash,
+
+      narPathname: data.URL,
       storePath: data.StorePath,
-      narURL: new URL(data.URL, binaryCache.url),
       compression: data.Compression,
       fileHash: new Hash(data.FileHash),
       narHash: new Hash(data.NarHash),
@@ -107,8 +101,6 @@ export class NarInfo extends Data<{
       references: data.References.split(" ").filter(Boolean),
       deriver: data.Deriver,
       sig: data.Sig,
-      raw: text,
-      listingURL,
     });
   }
 }

@@ -43,19 +43,7 @@ NarInfo {
     raw: "sha256:1386bzhbdwk63v0jl8qdmqgjz62xxib8i7f08c03f6rvy0dvmpws",
   },
   fileSize: 52484,
-  listingURL: URL {
-    hash: "",
-    host: "cache.nixos.org",
-    hostname: "cache.nixos.org",
-    href: "https://cache.nixos.org/a7hnr9dcmx3qkkn8a20g7md1wya5zc9l.ls",
-    origin: "https://cache.nixos.org",
-    password: "",
-    pathname: "/a7hnr9dcmx3qkkn8a20g7md1wya5zc9l.ls",
-    port: "",
-    protocol: "https:",
-    search: "",
-    username: "",
-  },
+  hash: "a7hnr9dcmx3qkkn8a20g7md1wya5zc9l",
   narHash: Hash {
     algorithm: "sha256",
     hash: Uint8Array(32) [
@@ -94,20 +82,8 @@ NarInfo {
     ],
     raw: "sha256:10rwhm2wj7r054b8yq5i66zh3pz5zvaxw691zznyrrk49jhr89qm",
   },
+  narPathname: "nar/1386bzhbdwk63v0jl8qdmqgjz62xxib8i7f08c03f6rvy0dvmpws.nar.xz",
   narSize: 234680,
-  narURL: URL {
-    hash: "",
-    host: "cache.nixos.org",
-    hostname: "cache.nixos.org",
-    href: "https://cache.nixos.org/nar/1386bzhbdwk63v0jl8qdmqgjz62xxib8i7f08c03f6rvy0dvmpws.nar.xz",
-    origin: "https://cache.nixos.org",
-    password: "",
-    pathname: "/nar/1386bzhbdwk63v0jl8qdmqgjz62xxib8i7f08c03f6rvy0dvmpws.nar.xz",
-    port: "",
-    protocol: "https:",
-    search: "",
-    username: "",
-  },
   raw: "StorePath: /nix/store/a7hnr9dcmx3qkkn8a20g7md1wya5zc9l-hello-2.12.1
 URL: nar/1386bzhbdwk63v0jl8qdmqgjz62xxib8i7f08c03f6rvy0dvmpws.nar.xz
 Compression: xz
@@ -124,7 +100,24 @@ Sig: cache.nixos.org-1:HBx8vRSFoiXhIKtXLv7LSHdEcIH5Ji4zeADslQEKWn+j++VJpWM8ASIMQ
     "a7hnr9dcmx3qkkn8a20g7md1wya5zc9l-hello-2.12.1",
   ],
   sig: "cache.nixos.org-1:HBx8vRSFoiXhIKtXLv7LSHdEcIH5Ji4zeADslQEKWn+j++VJpWM8ASIMQ4ilCucWkzN1SlZdqSLpNhHwWPayDA==",
-  storeDir: "/nix/store",
+  store: BinaryCache {
+    priority: 40,
+    storeDir: "/nix/store",
+    url: URL {
+      hash: "",
+      host: "cache.nixos.org",
+      hostname: "cache.nixos.org",
+      href: "https://cache.nixos.org/",
+      origin: "https://cache.nixos.org",
+      password: "",
+      pathname: "/",
+      port: "",
+      protocol: "https:",
+      search: "",
+      username: "",
+    },
+    wantMassQuery: true,
+  },
   storePath: "/nix/store/a7hnr9dcmx3qkkn8a20g7md1wya5zc9l-hello-2.12.1",
 }
 `;

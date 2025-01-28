@@ -98,3 +98,13 @@ export function createDecompressionStream(
       );
   }
 }
+
+export function getCompressionAlgorithmFromExtension(
+  name: string,
+): CompressionAlgorithm {
+  if (name.endsWith("gz")) return "gzip";
+  if (name.endsWith("bz2")) return "bzip2";
+  if (name.endsWith("zst")) return "zstd";
+  if (name.endsWith("xz")) return "xz";
+  return "none";
+}

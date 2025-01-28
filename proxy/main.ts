@@ -4,6 +4,7 @@ import { parseArgs } from "@std/cli";
 import { sortBy } from "@std/collections/sort-by";
 import { BinaryCache, MultiStore } from "../store.ts";
 import { assertEquals } from "@std/assert/equals";
+import { FsCache } from "./cache.ts";
 
 const args = parseArgs(Deno.args, {
   collect: ["upstream"],
@@ -35,6 +36,9 @@ sortBy(
   { order: "asc" }, // lower priority is most wanted
 );
 
+const localCache = new FsCache("./cache");
+store.stores.unshift(localCache);
+
 // maps nar pathname -> store index
 // saved when sending a narinfo response, deleted when sending a nar response
 const associatedStores = new Map<string, number>();
@@ -59,32 +63,49 @@ Deno.serve(
 
     if (pathname.endsWith(".narinfo")) {
       const hash = pathname.slice(1, -".narinfo".length);
-      const info = await store.get(hash, { signal });
+      const info = await store.getInfo(hash, { signal });
 
-      if (info.narURL.pathname.startsWith("/nar/")) {
-        associatedStores.set(info.narURL.pathname, info.storeIndex);
+      if (info.narPathname.startsWith("nar/")) {
+        const index = store.getIndex(info);
+        assert(index !== undefined);
+        associatedStores.set(info.narPathname, index);
       } else {
         console.warn(
-          "Expected nar pathname to start with /nar/:",
-          info.narURL.href,
+          "Expected nar pathname to start with nar/, got",
+          info.narPathname,
         );
       }
 
+      void localCache.putInfo(hash, info);
+
       return new Response(info.raw, {
-        headers: { "content-type": "text/plain" },
+        headers: { "content-type": "text/x-nix-narinfo" },
+      });
+    }
+
+    if (pathname.endsWith(".ls")) {
+      const hash = pathname.slice(1, -".ls".length);
+      const listing = await store.getListing(hash, { signal });
+
+      void localCache.putListing(hash, listing);
+
+      return new Response(JSON.stringify(listing), {
+        headers: { "content-type": "application/json" },
       });
     }
 
     if (pathname.startsWith("/nar/")) {
-      const storeIndex = associatedStores.get(pathname);
+      const storeIndex = associatedStores.get(pathname.slice(1));
       if (storeIndex !== undefined) {
         const upstream = store.stores[storeIndex];
-        assert(upstream instanceof BinaryCache);
-        const response = await fetch(new URL(pathname, upstream.url), request);
+        const response = await upstream.getNar(
+          { narPathname: pathname },
+          { signal },
+        );
 
-        // do something with the response
+        void localCache.putNar(pathname, response.clone());
 
-        return response.clone();
+        return response;
       }
     }
 
@@ -95,11 +116,7 @@ Deno.serve(
     for (const upstream of store.stores) {
       if (!(upstream instanceof BinaryCache)) continue;
       response = await fetch(new URL(pathname, upstream.url), request);
-      if (!response.ok) continue;
-
-      // do something with the response
-
-      return response.clone();
+      if (response.ok) break;
     }
 
     return response;

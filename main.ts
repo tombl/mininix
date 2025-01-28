@@ -2,8 +2,8 @@
 import { Database } from "@db/sqlite";
 import { parseArgs } from "@std/cli";
 import { join } from "@std/path";
-import Queue from "p-queue";
 import { SuperConsole } from "https://raw.githubusercontent.com/tombl/superconsole/9bac929/mod.ts";
+import Queue from "p-queue";
 import { createDecompressionStream } from "./compression.ts";
 import { Keychain, NIXOS_KEY } from "./keychain.ts";
 import { NarInfo } from "./narinfo.ts";
@@ -31,7 +31,7 @@ const HELP = `Usage: mininix [options] <package>...
 
 Options:
   -h, --help             Show this help message and exit
-  --store-dir <dir>      Directory to install packages to (default: ./out)
+  --store-dir <dir>      Directory to install packages to (default: /nix/store)
   --substituter <url>... Additional binary cache URLs to use
 `;
 
@@ -174,7 +174,7 @@ async function traverse(fullName: string) {
   seen.add(hash);
 
   const info = await queue.add(
-    ({ signal }) => cache.get(hash, { signal }),
+    ({ signal }) => cache.getInfo(hash, { signal }),
     { signal, priority: 2, throwOnTimeout: true },
   );
   for (const ref of info.references) traverse(ref);
@@ -191,7 +191,7 @@ async function traverse(fullName: string) {
       };
 
       const changed = await extract(
-        info.storePath.replace(info.storeDir, args["store-dir"]),
+        info.storePath.replace(info.store.storeDir, args["store-dir"]),
         info,
         signal,
         (current, total) => {

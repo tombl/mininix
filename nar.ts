@@ -1,6 +1,5 @@
-import { ByteSliceStream, toTransformStream } from "@std/streams";
-import { assertEquals } from "@std/assert";
 import { sortBy } from "@std/collections";
+import { ByteSliceStream, toTransformStream } from "@std/streams";
 
 type Entry =
   | RegularEntry
@@ -65,9 +64,17 @@ export type StreamEntry =
   | (SymlinkEntry & { path: string })
   | (DirectoryEntry & { path: string });
 
-export function createNarEntryStream(listing: NarListing) {
-  assertEquals(listing.version, 1);
+export function isNarListing(value: unknown): value is NarListing {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "root" in value &&
+    "version" in value &&
+    value.version === 1
+  );
+}
 
+export function createNarEntryStream(listing: NarListing) {
   const files = flatten(listing);
   sortBy(files.regular, (f) => f.narOffset, { order: "asc" });
 
