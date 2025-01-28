@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { Keychain, NIXOS_KEY } from "./keychain.ts";
 import { NarInfo } from "./narinfo.ts";
-import { Store } from "./store.ts";
+import type { Store } from "./store.ts";
 
 const INFO = `
 StorePath: /nix/store/syd87l2rxw8cbsxmxl853h0r6pdwhwjr-curl-7.82.0-bin

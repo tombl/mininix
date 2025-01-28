@@ -1,14 +1,19 @@
 import { assert } from "@std/assert/assert";
 import {
-  CompressionAlgorithm,
+  type CompressionAlgorithm,
   createDecompressionStream,
   isCompressionAlgorithm,
 } from "./compression.ts";
-import { Hash, LengthVerifierStream } from "./hash.ts";
-import { Keychain } from "./keychain.ts";
-import { createNarEntryStream } from "./nar.ts";
-import { Store } from "./store.ts";
-import { Data, parseKeyValue, ProgressReportingStream } from "./util.ts";
+import { Hash } from "./hash.ts";
+import type { Keychain, VerificationResult } from "./keychain.ts";
+import { createNarEntryStream, type StreamEntry } from "./nar.ts";
+import type { Store } from "./store.ts";
+import {
+  Data,
+  LengthVerifierStream,
+  parseKeyValue,
+  ProgressReportingStream,
+} from "./util.ts";
 
 export class NarInfo extends Data<{
   store: Store;
@@ -30,7 +35,7 @@ export class NarInfo extends Data<{
       signal?: AbortSignal;
       onProgress?: (current: number, total: number) => void;
     },
-  ) {
+  ): Promise<ReadableStream<StreamEntry>> {
     const [listing, nar] = await Promise.all([
       this.store.getListing(this.hash, options),
       this.store.getNar(this, options),
@@ -56,14 +61,14 @@ export class NarInfo extends Data<{
       .pipeThrough(createNarEntryStream(listing));
   }
 
-  verify(keychain: Keychain) {
+  verify(keychain: Keychain): Promise<VerificationResult> {
     return keychain.verify(
       this.sig,
       new TextEncoder().encode(this.fingerprint()),
     );
   }
 
-  fingerprint() {
+  fingerprint(): string {
     return [
       "1",
       this.storePath,
@@ -77,7 +82,7 @@ export class NarInfo extends Data<{
     text: string,
     store: Store,
     hash: string,
-  ) {
+  ): NarInfo {
     const data = parseKeyValue(text, ": ");
 
     assert(

@@ -1,7 +1,7 @@
+import { assertEquals } from "@std/assert/equals";
 import { createHash } from "node:crypto";
 import { decodeNixBase32 } from "./base32.ts";
 import { splitOnce } from "./util.ts";
-import { assertEquals } from "@std/assert";
 
 export class Hash {
   raw: string;
@@ -15,7 +15,7 @@ export class Hash {
     this.hash = decodeNixBase32(encodedHash);
   }
 
-  createVerifierStream() {
+  createVerifierStream(): HashVerifierStream {
     return new HashVerifierStream(this.algorithm, this.hash);
   }
 }
@@ -38,23 +38,6 @@ class HashVerifierStream extends TransformStream<Uint8Array, Uint8Array> {
           expectedHash,
           `Hash mismatch`,
         );
-      },
-    });
-  }
-}
-
-export class LengthVerifierStream
-  extends TransformStream<Uint8Array, Uint8Array> {
-  constructor(expectedLength: number) {
-    let actualLength = 0;
-
-    super({
-      transform(chunk, controller) {
-        actualLength += chunk.length;
-        controller.enqueue(chunk);
-      },
-      flush() {
-        assertEquals(actualLength, expectedLength, `Length mismatch`);
       },
     });
   }

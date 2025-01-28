@@ -1,3 +1,5 @@
+import { assertEquals } from "@std/assert/equals";
+
 export function splitOnce(str: string, sep: string): [string, string] {
   const idx = str.indexOf(sep);
   if (idx === -1) return [str, ""];
@@ -42,6 +44,23 @@ export class ProgressReportingStream extends TransformStream {
         controller.enqueue(chunk);
         this.bytes += chunk.length;
         report(this.bytes);
+      },
+    });
+  }
+}
+
+export class LengthVerifierStream
+  extends TransformStream<Uint8Array, Uint8Array> {
+  constructor(expectedLength: number) {
+    let actualLength = 0;
+
+    super({
+      transform(chunk, controller) {
+        actualLength += chunk.length;
+        controller.enqueue(chunk);
+      },
+      flush() {
+        assertEquals(actualLength, expectedLength, `Length mismatch`);
       },
     });
   }

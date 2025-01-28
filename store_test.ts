@@ -2,8 +2,8 @@ import { assertEquals, assertRejects } from "@std/assert";
 import { toArrayBuffer } from "@std/streams";
 import { assertSnapshot } from "@std/testing/snapshot";
 import { Keychain, NIXOS_KEY } from "./keychain.ts";
-import { StreamEntry } from "./nar.ts";
-import { NarInfo } from "./narinfo.ts";
+import type { StreamEntry } from "./nar.ts";
+import type { NarInfo } from "./narinfo.ts";
 import { BinaryCache } from "./store.ts";
 
 const netPermission = await Deno.permissions.query({ name: "net" });

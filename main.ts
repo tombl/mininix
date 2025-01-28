@@ -6,7 +6,7 @@ import { SuperConsole } from "https://raw.githubusercontent.com/tombl/superconso
 import Queue from "p-queue";
 import { createDecompressionStream } from "./compression.ts";
 import { Keychain, NIXOS_KEY } from "./keychain.ts";
-import { NarInfo } from "./narinfo.ts";
+import type { NarInfo } from "./narinfo.ts";
 import { BinaryCache, MultiStore } from "./store.ts";
 import { splitOnce } from "./util.ts";
 

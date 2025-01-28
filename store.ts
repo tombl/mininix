@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert/equals";
-import { isNarListing, NarListing } from "./nar.ts";
+import { isNarListing, type NarListing } from "./nar.ts";
 import { NarInfo } from "./narinfo.ts";
 import { Data, parseKeyValue } from "./util.ts";
 
@@ -28,7 +28,7 @@ export class BinaryCache extends Data<{
   wantMassQuery: boolean;
   priority: number;
 }> implements Store {
-  static async open(url: URL) {
+  static async open(url: URL): Promise<BinaryCache> {
     if (!url.pathname.endsWith("/")) url = new URL(url.href + "/");
     const response = await fetch(new URL("nix-cache-info", url));
     if (!response.ok) {
@@ -54,7 +54,10 @@ export class BinaryCache extends Data<{
     return response;
   }
 
-  async getInfo(hash: string, options?: { signal?: AbortSignal }) {
+  async getInfo(
+    hash: string,
+    options?: { signal?: AbortSignal },
+  ): Promise<NarInfo> {
     const response = await this.#fetch(hash + ".narinfo", options);
     return NarInfo.parse(await response.text(), this, hash);
   }
@@ -72,13 +75,13 @@ export class BinaryCache extends Data<{
   getNar(
     info: { narPathname: string },
     options: { signal?: AbortSignal } = {},
-  ) {
+  ): Promise<Response> {
     return this.#fetch(info.narPathname, options);
   }
 }
 
 export class MultiStore extends Data<{ stores: Store[] }> implements Store {
-  get storeDir() {
+  get storeDir(): string {
     const [{ storeDir }] = this.stores;
     for (const store of this.stores) {
       assertEquals(store.storeDir, storeDir);
@@ -87,7 +90,7 @@ export class MultiStore extends Data<{ stores: Store[] }> implements Store {
   }
 
   #indexes = new WeakMap<object, number>();
-  getIndex(object: object) {
+  getIndex(object: object): number | undefined {
     return this.#indexes.get(object);
   }
 

@@ -18,13 +18,13 @@ export type VerificationResult =
 export class Keychain {
   #keys = new Map<string, { key: CryptoKey; raw: string }>();
 
-  static async create(trustedKeys: string[]) {
+  static async create(trustedKeys: string[]): Promise<Keychain> {
     const keychain = new Keychain();
     await Promise.all(trustedKeys.map((raw) => keychain.trust(raw)));
     return keychain;
   }
 
-  async trust(raw: string) {
+  async trust(raw: string): Promise<CryptoKey> {
     const { name, bytes } = parse(raw);
 
     const existing = this.#keys.get(name);

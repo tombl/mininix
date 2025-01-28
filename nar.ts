@@ -74,7 +74,9 @@ export function isNarListing(value: unknown): value is NarListing {
   );
 }
 
-export function createNarEntryStream(listing: NarListing) {
+export function createNarEntryStream(
+  listing: NarListing,
+): TransformStream<Uint8Array, StreamEntry> {
   const files = flatten(listing);
   sortBy(files.regular, (f) => f.narOffset, { order: "asc" });
 
