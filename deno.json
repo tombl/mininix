@@ -8,7 +8,7 @@
     "./keychain": "./keychain.ts",
     "./nar": "./nar.ts",
     "./narinfo": "./narinfo.ts",
-    "./store": "./store.ts"
+    "./store": "./store/mod.ts"
   },
   "publish": {
     "exclude": [".*", "__snapshots__", "*_test.ts"]

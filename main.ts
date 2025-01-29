@@ -7,7 +7,7 @@ import Queue from "p-queue";
 import { createDecompressionStream } from "./compression.ts";
 import { Keychain, NIXOS_KEY } from "./keychain.ts";
 import type { NarInfo } from "./narinfo.ts";
-import { BinaryCache, MultiStore } from "./store.ts";
+import { BinaryCache, MultiStore } from "./store/mod.ts";
 import { splitOnce } from "./util.ts";
 
 const DB_PATH = "x86_64-linux-unstable.db";

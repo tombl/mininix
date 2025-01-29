@@ -7,7 +7,7 @@ import {
 import { Hash } from "./hash.ts";
 import type { Keychain, VerificationResult } from "./keychain.ts";
 import { createNarEntryStream, type StreamEntry } from "./nar.ts";
-import type { Store } from "./store.ts";
+import type { Store } from "./store/mod.ts";
 import {
   Data,
   LengthVerifierStream,
@@ -40,7 +40,7 @@ export class NarInfo extends Data<{
       this.store.getListing(this.hash, options),
       this.store.getNar(this, options),
     ]);
-    let body = nar.body!;
+    let body = nar;
 
     if (options?.onProgress) {
       const { onProgress } = options;
