@@ -1,8 +1,8 @@
 #!/usr/bin/env -S deno run -A
-import { Database } from "@db/sqlite";
 import { parseArgs } from "@std/cli";
 import { join } from "@std/path";
 import { SuperConsole } from "https://raw.githubusercontent.com/tombl/superconsole/9bac929/mod.ts";
+import Database from "libsql";
 import Queue from "p-queue";
 import { createDecompressionStream } from "./compression.ts";
 import { Keychain, NIXOS_KEY } from "./keychain.ts";
@@ -22,7 +22,7 @@ if (!(await Deno.stat(DB_PATH).then((f) => f.isFile, () => false))) {
   );
 }
 
-const db = new Database(DB_PATH, { readonly: true, create: false });
+const db = new Database(DB_PATH, { readonly: true, fileMustExist: true });
 
 const keychain = new Keychain();
 await keychain.trust(NIXOS_KEY);
@@ -56,7 +56,8 @@ if (args.help) {
 }
 
 const requestedPackages = db
-  .sql`select name, hash, full_name from packages where name in (${args._})`;
+  .prepare("select name, hash, full_name from packages where name = ?")
+  .all(args._) as Array<{ name: string; hash: string; full_name: string }>;
 
 if (requestedPackages.length !== args._.length) {
   const missing = args._.filter((name) =>
