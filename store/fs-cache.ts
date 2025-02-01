@@ -18,9 +18,8 @@ export class FsCache implements WritableStore {
   }
 
   async putInfo(hash: string, info: NarInfo) {
-    const path = join(this.#dir, hash);
-
-    await Deno.writeTextFile(path + ".narinfo", info.raw);
+    const path = join(this.#dir, hash + ".narinfo");
+    await Deno.writeTextFile(path, info.raw);
   }
   async getInfo(
     hash: string,
@@ -33,8 +32,8 @@ export class FsCache implements WritableStore {
   }
 
   async putListing(hash: string, listing: NarListing) {
-    const path = join(this.#dir, hash);
-    await Deno.writeTextFile(path + ".ls", JSON.stringify(listing));
+    const path = join(this.#dir, hash + ".ls");
+    await Deno.writeTextFile(path, JSON.stringify(listing));
   }
   async getListing(
     hash: string,
@@ -52,7 +51,12 @@ export class FsCache implements WritableStore {
   ) {
     assert(info.narPathname.startsWith("nar/"));
     const path = join(this.#dir, info.narPathname);
-    await Deno.writeFile(path + ".tmp", nar);
+    try {
+      await Deno.writeFile(path + ".tmp", nar);
+    } catch (error) {
+      await Deno.remove(path + ".tmp");
+      throw error;
+    }
     await Deno.rename(path + ".tmp", path);
   }
   async getNar(

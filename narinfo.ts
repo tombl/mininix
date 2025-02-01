@@ -90,6 +90,11 @@ export class NarInfo extends Data<{
       `Unsupported compression algorithm: ${data.Compression}`,
     );
 
+    assert(
+      data.StorePath.startsWith(store.storeDir) + "/",
+      `Mismatched store dir: expected ${store.storeDir}, got ${data.StorePath}`,
+    );
+
     return new NarInfo({
       store,
       hash,
