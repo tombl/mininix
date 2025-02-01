@@ -1,8 +1,8 @@
 import { assert } from "@std/assert/assert";
 import { join } from "@std/path/join";
-import { isNarListing, type NarListing } from "@tombl/mininix/nar";
-import { NarInfo } from "@tombl/mininix/narinfo";
-import type { WritableStore } from "@tombl/mininix/store";
+import { isNarListing, type NarListing } from "../nar.ts";
+import { NarInfo } from "../narinfo.ts";
+import type { WritableStore } from "./mod.ts";
 
 export class FsCache implements WritableStore {
   storeDir = "/nix/store";
