@@ -1,11 +1,6 @@
 {
   "version": "4",
   "specifiers": {
-    "jsr:@db/sqlite@*": "0.12.0",
-    "jsr:@db/sqlite@0.12": "0.12.0",
-    "jsr:@denosaurs/plug@1": "1.0.6",
-    "jsr:@std/assert@0.217": "0.217.0",
-    "jsr:@std/assert@0.221": "0.221.0",
     "jsr:@std/assert@^1.0.10": "1.0.11",
     "jsr:@std/assert@^1.0.11": "1.0.11",
     "jsr:@std/async@^1.0.9": "1.0.10",
@@ -14,21 +9,17 @@
     "jsr:@std/cli@^1.0.11": "1.0.11",
     "jsr:@std/collections@^1.0.10": "1.0.10",
     "jsr:@std/data-structures@^1.0.6": "1.0.6",
-    "jsr:@std/encoding@0.221": "0.221.0",
     "jsr:@std/encoding@^1.0.6": "1.0.6",
-    "jsr:@std/fmt@0.221": "0.221.0",
-    "jsr:@std/fs@0.221": "0.221.0",
     "jsr:@std/fs@^1.0.10": "1.0.10",
     "jsr:@std/fs@^1.0.9": "1.0.10",
     "jsr:@std/internal@^1.0.5": "1.0.5",
-    "jsr:@std/path@0.217": "0.217.0",
-    "jsr:@std/path@0.221": "0.221.0",
     "jsr:@std/path@^1.0.8": "1.0.8",
     "jsr:@std/streams@^1.0.8": "1.0.8",
     "jsr:@std/testing@^1.0.9": "1.0.9",
     "npm:@sqlite.org/sqlite-wasm@*": "3.48.0-build3",
     "npm:@types/node@*": "18.16.19",
     "npm:jsr@*": "0.13.3",
+    "npm:libsql@~0.5.0-pre.6": "0.5.0-pre.6",
     "npm:log-update@*": "6.1.0",
     "npm:p-queue@*": "8.1.0",
     "npm:p-queue@^8.1.0": "8.1.0",
@@ -36,28 +27,6 @@
     "npm:sqlite-wasm-http@*": "1.2.0"
   },
   "jsr": {
-    "@db/sqlite@0.12.0": {
-      "integrity": "dd1ef7f621ad50fc1e073a1c3609c4470bd51edc0994139c5bf9851de7a6d85f",
-      "dependencies": [
-        "jsr:@denosaurs/plug",
-        "jsr:@std/path@0.217"
-      ]
-    },
-    "@denosaurs/plug@1.0.6": {
-      "integrity": "6cf5b9daba7799837b9ffbe89f3450510f588fafef8115ddab1ff0be9cb7c1a7",
-      "dependencies": [
-        "jsr:@std/encoding@0.221",
-        "jsr:@std/fmt",
-        "jsr:@std/fs@0.221",
-        "jsr:@std/path@0.221"
-      ]
-    },
-    "@std/assert@0.217.0": {
-      "integrity": "c98e279362ca6982d5285c3b89517b757c1e3477ee9f14eb2fdf80a45aaa9642"
-    },
-    "@std/assert@0.221.0": {
-      "integrity": "a5f1aa6e7909dbea271754fd4ab3f4e687aeff4873b4cef9a320af813adb489a"
-    },
     "@std/assert@1.0.11": {
       "integrity": "2461ef3c368fe88bc60e186e7744a93112f16fd110022e113a0849e94d1c83c1",
       "dependencies": [
@@ -79,42 +48,17 @@
     "@std/data-structures@1.0.6": {
       "integrity": "76a7fd8080c66604c0496220a791860492ab21a04a63a969c0b9a0609bbbb760"
     },
-    "@std/encoding@0.221.0": {
-      "integrity": "d1dd76ef0dc5d14088411e6dc1dede53bf8308c95d1537df1214c97137208e45"
-    },
     "@std/encoding@1.0.6": {
       "integrity": "ca87122c196e8831737d9547acf001766618e78cd8c33920776c7f5885546069"
-    },
-    "@std/fmt@0.221.0": {
-      "integrity": "379fed69bdd9731110f26b9085aeb740606b20428ce6af31ef6bd45ef8efa62a"
-    },
-    "@std/fs@0.221.0": {
-      "integrity": "028044450299de8ed5a716ade4e6d524399f035513b85913794f4e81f07da286",
-      "dependencies": [
-        "jsr:@std/assert@0.221",
-        "jsr:@std/path@0.221"
-      ]
     },
     "@std/fs@1.0.10": {
       "integrity": "bf041f9d7a0a460817f0421be8946d0e06011b3433e6c83a215628de5e3c7c2c",
       "dependencies": [
-        "jsr:@std/path@^1.0.8"
+        "jsr:@std/path"
       ]
     },
     "@std/internal@1.0.5": {
       "integrity": "54a546004f769c1ac9e025abd15a76b6671ddc9687e2313b67376125650dc7ba"
-    },
-    "@std/path@0.217.0": {
-      "integrity": "1217cc25534bca9a2f672d7fe7c6f356e4027df400c0e85c0ef3e4343bc67d11",
-      "dependencies": [
-        "jsr:@std/assert@0.217"
-      ]
-    },
-    "@std/path@0.221.0": {
-      "integrity": "0a36f6b17314ef653a3a1649740cc8db51b25a133ecfe838f20b79a56ebe0095",
-      "dependencies": [
-        "jsr:@std/assert@0.221"
-      ]
     },
     "@std/path@1.0.8": {
       "integrity": "548fa456bb6a04d3c1a1e7477986b6cffbce95102d0bb447c67c4ee70e0364be"
@@ -133,11 +77,35 @@
         "jsr:@std/data-structures",
         "jsr:@std/fs@^1.0.9",
         "jsr:@std/internal",
-        "jsr:@std/path@^1.0.8"
+        "jsr:@std/path"
       ]
     }
   },
   "npm": {
+    "@libsql/darwin-arm64@0.5.0-pre.6": {
+      "integrity": "sha512-T99Ap/ui7xqFe9ZjWUWRbSCqh9Bo/uZ/wOFtVi9U/2YlBdG4Vv2A7Uz1USYnivJm0nvyYjcy2N9enaRl2cyKkQ=="
+    },
+    "@libsql/darwin-x64@0.5.0-pre.6": {
+      "integrity": "sha512-09fTHmTrxltuQ4oyM7RCz4qRF1oiZS9uf0IIIOI7do6dQu8830a7rrqhpg33LKBs9eBfKWuzpC6n8SuuatSFOw=="
+    },
+    "@libsql/linux-arm64-gnu@0.5.0-pre.6": {
+      "integrity": "sha512-HDQH42ZxzhPMcFdcARV2I7oH7LK/jk2eqhODtIbnVn0kiklHY98F4wk1rbqFIzJljMuzq9HSycJtntUyubpnWg=="
+    },
+    "@libsql/linux-arm64-musl@0.5.0-pre.6": {
+      "integrity": "sha512-v6NmFwkQutzud5ZWbo0BWhfIe4OyfQ1qXq/uihpcLOjPUFyWl5vHelOQn1hflJeQ2PcaYxFQ6XPQimSs1HsqMw=="
+    },
+    "@libsql/linux-x64-gnu@0.5.0-pre.6": {
+      "integrity": "sha512-IOSlRJWNUoEdtL9Y2RrGJyNR4X9t2aWTcbVkYMRtKfDIqylYO8UXDtMLFdLLnjR4p5yZKnO9OqOkbMko8DKdOw=="
+    },
+    "@libsql/linux-x64-musl@0.5.0-pre.6": {
+      "integrity": "sha512-BGICFHvEKIZtrD4UYjIg7SfGmak6zGRUAp/MVS+40FMe4eh7d6uvmQFs6JAaHErazLEKHLKbIKIYAXe1srHKVQ=="
+    },
+    "@libsql/win32-x64-msvc@0.5.0-pre.6": {
+      "integrity": "sha512-1RUqZ9wURWlHOXvafbnhRe2HGh+B7yfqvUQV3RWzS9c7oh1rJbeO7p0XDFFWyRjN8yYFbjlZDmRUcYr1Lo83qQ=="
+    },
+    "@neon-rs/load@0.0.4": {
+      "integrity": "sha512-kTPhdZyTQxB+2wpiRcFWrDcejc4JI6tkPuS7UZCG4l6Zvc5kU/gGQ/ozvHTh1XR5tS+UlfAfGuPajjzQjCiHCw=="
+    },
     "@sqlite.org/sqlite-wasm@3.48.0-build3": {
       "integrity": "sha512-lOx3YYT/cDk4PSbgXHai7XHa9gGzFUh/rmL5vCJB3e+9dQnZi3GYrKsVMJHTkznhTurQ6ud9Hjv9Rhf1dNmJ/Q=="
     },
@@ -161,6 +129,9 @@
       "dependencies": [
         "restore-cursor"
       ]
+    },
+    "detect-libc@2.0.2": {
+      "integrity": "sha512-UX6sGumvvqSaXgdKGUsgZWqcUyIXZ/vZTrlRT/iobiKhGL0zL4d3osHj3uqllWJK+i+sixDS/3COVEOFbupFyw=="
     },
     "emoji-regex@10.4.0": {
       "integrity": "sha512-EC+0oUMY1Rqm4O6LLrgjtYDvcVYTy7chDnM4Q7030tP4Kwj3u/pR6gP9ygnp2CJMK5Gq+9Q2oqmrFJAz01DXjw=="
@@ -190,6 +161,20 @@
     },
     "kolorist@1.8.0": {
       "integrity": "sha512-Y+60/zizpJ3HRH8DCss+q95yr6145JXZo46OTpFvDZWLfRCE4qChOyk1b26nMaNpfHHgxagk9dXT5OP0Tfe+dQ=="
+    },
+    "libsql@0.5.0-pre.6": {
+      "integrity": "sha512-TvugJnL32QiZCvpu6Eh/uh2RjpzsxprqVd2hWygHFUK5abcotaRWYrHmuygXFe43QmsJrmYjN0DAKLqoiy8d2w==",
+      "dependencies": [
+        "@libsql/darwin-arm64",
+        "@libsql/darwin-x64",
+        "@libsql/linux-arm64-gnu",
+        "@libsql/linux-arm64-musl",
+        "@libsql/linux-x64-gnu",
+        "@libsql/linux-x64-musl",
+        "@libsql/win32-x64-msvc",
+        "@neon-rs/load",
+        "detect-libc"
+      ]
     },
     "log-update@6.1.0": {
       "integrity": "sha512-9ie8ItPR6tjY5uYJh8K/Zrv/RMZ5VOlOWvtZdEHYSTFKZfIBPQa9tOAEeAWhd+AnIneLJ22w5fjOYtoutpWq5w==",
@@ -283,7 +268,6 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@db/sqlite@0.12",
       "jsr:@std/assert@^1.0.11",
       "jsr:@std/bytes@^1.0.4",
       "jsr:@std/cli@^1.0.11",
@@ -292,6 +276,7 @@
       "jsr:@std/path@^1.0.8",
       "jsr:@std/streams@^1.0.8",
       "jsr:@std/testing@^1.0.9",
+      "npm:libsql@~0.5.0-pre.6",
       "npm:p-queue@^8.1.0"
     ]
   }
